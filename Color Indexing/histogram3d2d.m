@@ -38,7 +38,7 @@ for i = 1:ncols
     % everything < ctrs(1) gets counted in first bin, 
     % everything > ctrs(end) gets counted in last bin.
     histcEdges = [-Inf edges{i}(2:end-1) Inf];
-    [dum(:,i),bin(:,i)] = histc(x(:,i),histcEdges,1);
+    [dum,bin(:,i)] = histc(x(:,i),histcEdges,1);
     bin(:,i) = min(bin(:,i),nbins(i));
 end
 
