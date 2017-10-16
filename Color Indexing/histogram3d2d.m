@@ -81,9 +81,9 @@ if (flag == 0)
     scatter3(X,Y,Z,S,C,'filled','s'); 
     axis([0 16 0 8 0 16]);
     
-    xlabel(['rg axis [',num2str(round(edges{1}(1))),',',num2str(round(edges{1}(16))),']']);
-    ylabel(['wb axis [',num2str(round(edges{2}(1))),',',num2str(round(edges{2}(8))),']']);
-    zlabel(['by axis [',num2str(round(edges{3}(1))),',',num2str(round(edges{3}(16))),']']);
+    xlabel(['rg axis [',num2str(round(edges{1}(1))),',',num2str(round(edges{1}(nbins(1)))),']']);
+    ylabel(['wb axis [',num2str(round(edges{2}(1))),',',num2str(round(edges{2}(nbins(2)))),']']);
+    zlabel(['by axis [',num2str(round(edges{3}(1))),',',num2str(round(edges{3}(nbins(3)))),']']);
     title('3D histogram of three opponent color axes');
 
     box on
@@ -118,8 +118,8 @@ else
         end
     end 
     scatter(X ,Y ,S,C,'filled','s'); 
-    xlabel(['r'' axis [',num2str(edges{1}(1)),',',num2str(edges{1}(8)),']']);
-    ylabel(['g'' axis [',num2str(edges{2}(1)),',',num2str(edges{2}(8)),']']);
+    xlabel(['r'' axis [',num2str(edges{1}(1)),',',num2str(edges{1}(nbins(1))),']']);
+    ylabel(['g'' axis [',num2str(edges{2}(1)),',',num2str(edges{2}(nbins(2))),']']);
 
     title('2D histogram of color constancy algorithm');
 end
