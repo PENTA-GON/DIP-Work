@@ -1,9 +1,8 @@
 clear;close all;clc;
 
-flag = 0;
-
+% Read 2 images
 I_A = imread('77.jpg');
-I_B = imread('104.jpg');
+I_B = imread('75.jpg');
 
 %% using 1D histogram intersection on separate RGB pixels
 nbins = 50;
@@ -13,11 +12,10 @@ for iColor = 1 : 3
     [hist_B, bin_B] = imhist(I_B(:,:,iColor), nbins);
 
     subplot(3,1,iColor);
-    plot(bin_A, hist_A, 'r-');
+    plot(bin_A, hist_A, 'r-'); 
     hold on;
     plot(bin_B, hist_B, 'g-');
-    %hold off;
-    grid on;
+    grid on; legend('image-A','image-B');
     %simple metric for testing similiarity
     k(iColor) = HistIntersec_1D(hist_A, hist_B);
 end
