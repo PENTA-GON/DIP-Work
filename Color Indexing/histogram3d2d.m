@@ -79,12 +79,8 @@ if (flag == 0)
             end
         end
     end 
-<<<<<<< HEAD
-    figure;
-    scatter3(X,Y,Z,S,C,'filled','s'); 
-=======
+
     scatter3(X,Y,Z,S,C,'filled','s','MarkerfaceAlpha',0.8); 
->>>>>>> 66a570cd2da637108aac93e5faf1b28461ff107e
     axis([0 16 0 8 0 16]);
     
     xlabel(['rg axis [',num2str(round(edges{1}(1))),',',num2str(round(edges{1}(nbins(1)))),']']);
