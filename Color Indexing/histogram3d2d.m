@@ -12,23 +12,23 @@ if (flag == 0)
     by = 2*b - r - g;
     wb = r + g + b;
     
-    x = [rg(:),wb(:),by(:)];
+    w = [rg(:),wb(:),by(:)];
     
 % 2D histogram    
 else 
     r1 = r ./ (r + g + b);
     g1 = g ./(r + g + b);
     
-    x = [r1(:),g1(:)];
+   w = [r1(:),g1(:)];
 end
 
-[nrows,ncols] = size(x);
+[nrows,ncols] = size(w);
 % Bin each observation in sifferent directions, such asx,y,z-direction.
 bin = zeros(nrows,ncols);
 
 for i = 1:ncols
-    minx = min(x(:,i));
-    maxx = max(x(:,i));
+    minx = min(w(:,i));
+    maxx = max(w(:,i));
     
     % Make histc mimic hist behavior  
     binwidth{i} = (maxx - minx) / nbins(i);
@@ -38,7 +38,8 @@ for i = 1:ncols
     % everything < ctrs(1) gets counted in first bin, 
     % everything > ctrs(end) gets counted in last bin.
     histcEdges = [-Inf edges{i}(2:end-1) Inf];
-    [dum,bin(:,i)] = histc(x(:,i),histcEdges,1);
+    [dum,bin(:,i)] = histc(w(:,i),histcEdges,1);
+    bin(:,i) = max(bin(:,i),1);
     bin(:,i) = min(bin(:,i),nbins(i));
 end
 
@@ -78,8 +79,12 @@ if (flag == 0)
             end
         end
     end 
+<<<<<<< HEAD
     figure;
     scatter3(X,Y,Z,S,C,'filled','s'); 
+=======
+    scatter3(X,Y,Z,S,C,'filled','s','MarkerfaceAlpha',0.8); 
+>>>>>>> 66a570cd2da637108aac93e5faf1b28461ff107e
     axis([0 16 0 8 0 16]);
     
     xlabel(['rg axis [',num2str(round(edges{1}(1))),',',num2str(round(edges{1}(nbins(1)))),']']);
@@ -111,14 +116,19 @@ else
                         j = j + 1;
                     end
                 end
-                c = uint8(mean(ind));
+                
+                if(size(ind,1)~= 1)
+                    c = uint8(mean(ind));
+                else% only one pixel within bin(x,y) 
+                    c = ind;
+                end
                 C(counts,:)= im2double(uint8(I(c(1),c(2),:)));
                 
                 counts = counts + 1;
             end
         end
     end 
-    scatter(X ,Y ,S,C,'filled','s'); 
+    scatter(X ,Y ,S,C,'filled','s','MarkerfaceAlpha',0.8); 
     xlabel(['r'' axis [',num2str(edges{1}(1)),',',num2str(edges{1}(nbins(1))),']']);
     ylabel(['g'' axis [',num2str(edges{2}(1)),',',num2str(edges{2}(nbins(2))),']']);
 

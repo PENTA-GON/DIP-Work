@@ -1,0 +1,8 @@
+function [ match_value ] = HistIntersec_1( hist_A, hist_B )
+%UNTITLED Summary of this function goes here
+%   hist_A 
+    hist_min = min(hist_A, hist_B);
+
+    
+end
+
