@@ -78,6 +78,7 @@ if (flag == 0)
             end
         end
     end 
+    figure;
     scatter3(X,Y,Z,S,C,'filled','s'); 
     axis([0 16 0 8 0 16]);
     
