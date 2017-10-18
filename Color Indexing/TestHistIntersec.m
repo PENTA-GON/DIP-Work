@@ -2,16 +2,17 @@ clear;close all;clc;
 
 % Read 2 images
 I_A = imread('77.jpg');
-I_B = imread('75.jpg');
+I_B = imread('104.jpg');
 
-%% using 1D histogram intersection on separate RGB pixels
+%% using 1D histogram intersection on  RGB color space
+%{
 nbins = 50;
 figure;
 for iColor = 1 : 3
     [hist_A, bin_A] = imhist(I_A(:,:,iColor), nbins);
     [hist_B, bin_B] = imhist(I_B(:,:,iColor), nbins);
 
-    subplot(3,1,iColor);
+    subplot(3,2,iColor+(iColor-1));
     plot(bin_A, hist_A, 'r-'); 
     hold on;
     plot(bin_B, hist_B, 'g-');
@@ -19,13 +20,77 @@ for iColor = 1 : 3
     %simple metric for testing similiarity
     k(iColor) = HistIntersec_1D(hist_A, hist_B);
 end
+%}
+%% using 1D histogram intersection on opponent color spaces
+%{
+[rg, by, wb] = rgb2opp(I_A);
+[hist_rg_A, bin_rg_A] = imhist(rg, nbins);
+[hist_by_A, bin_by_A] = imhist(by, nbins);
+[hist_wb_A, bin_wb_A] = imhist(wb, nbins);
+[rg, by, wb] = rgb2opp(I_B);
+[hist_rg_B, bin_rg_B] = imhist(rg, nbins);
+[hist_by_B, bin_by_B] = imhist(by, nbins);
+[hist_wb_B, bin_wb_B] = imhist(wb, nbins);
+%figure;
+subplot(322),plot(bin_rg_A, hist_rg_A, 'r-'); hold on;plot(bin_rg_B, hist_rg_B, 'g-');
+grid on; legend('image-A','image-B');
+subplot(324),plot(bin_by_A, hist_by_A, 'r-'); hold on;plot(bin_by_B, hist_by_B, 'g-');
+grid on; legend('image-A','image-B');
+subplot(326),plot(bin_wb_A, hist_wb_A, 'r-'); hold on;plot(bin_wb_B, hist_wb_B, 'g-');
+grid on; legend('image-A','image-B');
+%}
 %% Using 3d histogram intersection on three opponent color axes
+%{
 nbins = [16 8 16];
 flag = 0;
 %convert image into 3D histogram
+figure;
 n_A = histogram3d2d( I_A, nbins,flag);
+figure;
 n_B = histogram3d2d( I_B, nbins,flag);
 %perform histogram intersection
-[x,y,z] = HistIntersec_3D(n_A, n_B);
+[x,y,z, sValue] = HistIntersec_3D(n_A, n_B);
 %mean of similiarity index using histogram intersection
 sValue = mean([mean(x) mean(y) mean(z)]);
+%}
+%% To visualize similarity among training data sets
+train_folder_name = '.\PP_Toys_03\Training';
+% all files in training folder
+filenames=dir(fullfile(train_folder_name,'*.jpg'));
+filenames={filenames.name};
+n_samples=numel(filenames);
+
+%% Visualization of 3D and 2D plot
+nbins3d = [16 8 16];
+flag3d = 0;
+%{
+figure;
+for i=1:n_samples    
+    I = imread(fullfile(train_folder_name, num2str(cell2mat(filenames(i)))));
+    subplot(121), imshow(I);
+    %3D histogram
+    subplot(122), histogram3d2d( I, nbins3d,flag3d, true);
+    %2D histogram
+    pause;
+end
+%}
+
+%% Histogram Intersection
+%{
+isPlot = false;
+for i=1:n_samples 
+    I = imread(fullfile(train_folder_name, num2str(cell2mat(filenames(i)))));
+    hist3d{i} = histogram3d2d( I, nbins3d,flag3d, isPlot);
+end
+save('hist3d.mat', hist3d);
+%}
+load('hist3d.mat');
+nImg = numel(hist3d);
+for i= 1 : nImg
+    for j=1 : nImg
+        [,sValue] = HistIntersec_3D(hist3d{i}, hist3d{j});
+        sResults{i,j} = mean(sValue);
+    end
+end
+% To plot histogram intersection results similar to Fig 7
+
