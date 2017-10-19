@@ -1,4 +1,4 @@
-function [ min_x, min_y, min_z ] = HistIntersec_3D( hist_A, hist_B )
+function [ min_x, min_y, min_z, sValue ] = HistIntersec_3D( hist_A, hist_B )
 %HistIntersec_3D Basic histogram intersections using minimum values between
 %two 3D-histograms 
 % hist_A - Model image histogram
@@ -20,6 +20,7 @@ function [ min_x, min_y, min_z ] = HistIntersec_3D( hist_A, hist_B )
     for z=1 : size(hist_A, 3)
         min_z(:,z) = sum(sum(hist_min(:,:,z))) / sum(sum(hist_A(:,:,z)));
     end
+    sValue = mean([mean(x) mean(y) mean(z)]);
 end
 
 %convert 3d to 2d matrix

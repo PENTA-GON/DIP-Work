@@ -1,4 +1,4 @@
-function [ n ] = histogram3d2d( I,nbins,flag )
+function [ n ] = histogram3d2d( I,nbins,flag, isPlot )
 % Task1.Create 3D and 2D histogram
 % I: image input; nbins: size of bins; flag: 0-3D histogram and 1-2D histogram
 
@@ -80,20 +80,24 @@ if (flag == 0)
         end
     end 
 
-    scatter3(X,Y,Z,S,C,'filled','s','MarkerfaceAlpha',0.8); 
-    axis([0 16 0 8 0 16]);
-    
-    xlabel(['rg axis [',num2str(round(edges{1}(1))),',',num2str(round(edges{1}(nbins(1)))),']']);
-    ylabel(['wb axis [',num2str(round(edges{2}(1))),',',num2str(round(edges{2}(nbins(2)))),']']);
-    zlabel(['by axis [',num2str(round(edges{3}(1))),',',num2str(round(edges{3}(nbins(3)))),']']);
-    title('3D histogram of three opponent color axes');
+    %figure;
+    if isPlot
+        scatter3(X,Y,Z,S,C,'filled','s');%,'MarkerfaceAlpha',0.8); 
 
-    box on
-    ax = gca;
-    ax.BoxStyle = 'full';
-    set(gca,'YDir','reverse'); 
+        axis([0 16 0 8 0 16]);
 
-    view(30,30);
+        xlabel(['rg axis [',num2str(round(edges{1}(1))),',',num2str(round(edges{1}(nbins(1)))),']']);
+        ylabel(['wb axis [',num2str(round(edges{2}(1))),',',num2str(round(edges{2}(nbins(2)))),']']);
+        zlabel(['by axis [',num2str(round(edges{3}(1))),',',num2str(round(edges{3}(nbins(3)))),']']);
+        title('3D histogram of three opponent color axes');
+
+        box on
+        ax = gca;
+        ax.BoxStyle = 'full';
+        set(gca,'YDir','reverse'); 
+
+        view(30,30);
+    end
 else
     for y = 1:nbins(2)
         for x = 1:nbins(1)
@@ -124,11 +128,13 @@ else
             end
         end
     end 
-    scatter(X ,Y ,S,C,'filled','s','MarkerfaceAlpha',0.8); 
-    xlabel(['r'' axis [',num2str(edges{1}(1)),',',num2str(edges{1}(nbins(1))),']']);
-    ylabel(['g'' axis [',num2str(edges{2}(1)),',',num2str(edges{2}(nbins(2))),']']);
+    if isPlot
+        scatter(X ,Y ,S,C,'filled','s','MarkerfaceAlpha',0.8); 
+        xlabel(['r'' axis [',num2str(edges{1}(1)),',',num2str(edges{1}(nbins(1))),']']);
+        ylabel(['g'' axis [',num2str(edges{2}(1)),',',num2str(edges{2}(nbins(2))),']']);
 
-    title('2D histogram of color constancy algorithm');
+        title('2D histogram of color constancy algorithm');
+    end
 end
 
 end
