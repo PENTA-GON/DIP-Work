@@ -40,14 +40,15 @@ subplot(326),plot(bin_wb_A, hist_wb_A, 'r-'); hold on;plot(bin_wb_B, hist_wb_B, 
 grid on; legend('image-A','image-B');
 %}
 %% Using 3d histogram intersection on three opponent color axes
-%{
+
 nbins = [16 8 16];
 flag = 0;
 %convert image into 3D histogram
 figure;
-n_A = histogram3d2d( I_A, nbins,flag);
+isPlot = true;
+n_A = histogram3d2d( I_A, nbins,flag, isPlot);
 figure;
-n_B = histogram3d2d( I_B, nbins,flag);
+n_B = histogram3d2d( I_B, nbins,flag, isPlot);
 %perform histogram intersection
 [x,y,z, sValue] = HistIntersec_3D(n_A, n_B);
 %mean of similiarity index using histogram intersection
