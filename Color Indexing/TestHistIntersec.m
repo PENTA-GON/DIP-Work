@@ -82,7 +82,7 @@ for i=1:n_samples
     I = imread(fullfile(train_folder_name, num2str(cell2mat(filenames(i)))));
     hist3d{i} = histogram3d2d( I, nbins3d,flag3d, isPlot);
 end
-save('hist3d.mat', hist3d);
+save('hist3d.mat', 'hist3d');
 %}
 load('hist3d.mat');
 nImg = numel(hist3d);
@@ -92,5 +92,6 @@ for i= 1 : nImg
         sResults{i,j} = mean(sValue);
     end
 end
+save('histResults.mat', 'sResults');
 % To plot histogram intersection results similar to Fig 7
 
