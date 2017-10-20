@@ -63,7 +63,9 @@ n_samples=numel(filenames);
 
 %% Visualization of 3D and 2D plot
 nbins3d = [16 8 16];
+nbins2d = [8 8];
 flag3d = 0;
+flag2d = 1;
 %{
 figure;
 for i=1:n_samples    
@@ -82,17 +84,27 @@ isPlot = false;
 for i=1:n_samples 
     I = imread(fullfile(train_folder_name, num2str(cell2mat(filenames(i)))));
     hist3d{i} = histogram3d2d( I, nbins3d,flag3d, isPlot);
+    hist2d{i} = histogram3d2d( I, nbins2d,flag2d, isPlot);
 end
 save('hist3d.mat', 'hist3d');
+save('hist2d.mat', 'hist2d');
 %}
 load('hist3d.mat');
 nImg = numel(hist3d);
 for i= 1 : nImg
     for j=1 : nImg
-        [,sValue] = HistIntersec_3D(hist3d{i}, hist3d{j});
-        sResults{i,j} = mean(sValue);
+        sResults{i,j} = HistIntersec(hist3d{i}, hist3d{j});
     end
 end
-save('histResults.mat', 'sResults');
+save('histResults3d.mat', 'sResults');
+
+load('hist2d.mat');
+nImg = numel(hist2d);
+for i= 1 : nImg
+    for j=1 : nImg
+        sResults{i,j} = HistIntersec(hist2d{i}, hist2d{j});
+    end
+end
+save('histResults2d.mat', 'sResults');
 % To plot histogram intersection results similar to Fig 7
 
