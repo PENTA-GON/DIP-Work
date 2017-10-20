@@ -93,7 +93,7 @@ load('hist3d.mat');
 nImg = numel(hist3d);
 for i= 1 : nImg
     for j=1 : nImg
-        sResults{i,j} = HistIntersec(hist3d{i}, hist3d{j});
+        sResults(i,j) = HistIntersec(hist3d{i}, hist3d{j});
     end
 end
 save('histResults3d.mat', 'sResults');
@@ -102,7 +102,7 @@ load('hist2d.mat');
 nImg = numel(hist2d);
 for i= 1 : nImg
     for j=1 : nImg
-        sResults{i,j} = HistIntersec(hist2d{i}, hist2d{j});
+        sResults(i,j) = HistIntersec(hist2d{i}, hist2d{j});
     end
 end
 save('histResults2d.mat', 'sResults');
