@@ -10,10 +10,9 @@ Row = [1:1:numR];
 figure;
 for i=1: numR
    for j=1 : numC
-       h = scatter(col(i,j), row(i,j), 's',...
+       h = scatter(col(i,j), row(i,j), sResults{i,j}*20, 's',...
            'MarkerEdgeColor',[0 0 1],...
-           'MarkerFaceColor',[0 0 1],...
-       'linewidth', sResults{i,j}*10);
+           'MarkerFaceColor',[0 0 1]);
        hold on;
    end
 end
@@ -23,7 +22,18 @@ end
  yticks(Row);
  yticklabels({1:1:75});
  set(gca, 'XAxisLocation','top','YAxisLocation','left','ydir','reverse');
+ 
+%%axis setting for R2016a
+%{
+set(gca, 'XAxisLocation','top','YAxisLocation',...
+    'left','YDir','reverse',...
+    'fontsize',5);
 
+set(gca,'xtick',Row); 
+set(gca,'xticklabel',{1:1:75});
+set(gca,'ytick',Row); 
+set(gca,'yticklabel',{1:1:75});
+%}
 
 %{
 %% example obtained from web
