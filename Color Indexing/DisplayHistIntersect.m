@@ -1,26 +1,31 @@
 clear; close all; clc;
 
-load('histResults.mat');
+load('histResults3d.mat');
+%load('histResults2d.mat');
+
 numR = size(sResults,1);
 numC = size(sResults,2);
 Row = [1:1:numR];
 [col,row] = meshgrid(Row); %only use x
 %myCol='byr'; %'MarkerFaceColor',myCol(1),
 
-figure;
+counts = 1;
 for i=1: numR
    for j=1 : numC
-       h = scatter(col(i,j), row(i,j), sResults{i,j}*20, 's',...
-           'MarkerEdgeColor',[0 0 1],...
-           'MarkerFaceColor',[0 0 1]);
-       hold on;
+       X(counts) = i;
+       Y(counts) = j;
+       counts = counts + 1;
    end
 end
+
+figure;
+scatter(X, Y, sResults(:)*20,[0 0 1], 's','filled');
+
 %trying to change 
  xticks(Row);xtickangle(45);
- xticklabels({1:1:75});
+ xticklabels({1:1:numR});
  yticks(Row);
- yticklabels({1:1:75});
+ yticklabels({1:1:numC});
  set(gca, 'XAxisLocation','top','YAxisLocation','left','ydir','reverse');
  
 %%axis setting for R2016a
