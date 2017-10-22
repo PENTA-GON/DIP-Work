@@ -118,5 +118,5 @@ load('max_idx_hist.mat');
 maxBins = 10;
 sMatch = zeros(nImg, nImg);
 for i= 1 : nImg
-   sMatch = MatchIncreHistIntersect(max_idx_hist, hist3d{i}, maxBins);
+   sMatch = MatchIncreHistIntersect(max_idx_hist, hist3d{i}, maxBins, nbins3d);
 end
