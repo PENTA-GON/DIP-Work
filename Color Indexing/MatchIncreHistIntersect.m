@@ -9,8 +9,10 @@ function [ sIdx ] = MatchIncreHistIntersect( max_hist_model, test_hist, maxBins,
     tBins = sum(nMaxBins);
     for i = 1 : numel(nMaxBins)
         minBins = maxBins/tBins;
-        if mod(maxBins/tBins) == 0
-           bins_color = mMaxBins * minBins; 
+        if mod(maxBins,tBins) == 0
+           bins_color = nMaxBins * minBins;
+        else
+            %specify # bins for each color index according to maxBins
         end
     end
     %sort test image histogram bins by size

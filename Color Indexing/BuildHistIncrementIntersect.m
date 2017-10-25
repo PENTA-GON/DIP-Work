@@ -52,7 +52,7 @@ function [ com_idx_hist, idx_mod_hist ] = BuildHistIncrementIntersect(mod_hist, 
     idx_mod_hist{1,3} = sortedBin;
     idx_mod_hist{2,3} = sortedProb;
     %max_by = [sortedBin(:,1) max(sortedProb,[],2)]; %max values at first column
-    [max_by, by_idx] = sort(max(sortedProb,[],2),'descend')
+    [max_by, by_idx] = sort(max(sortedProb,[],2),'descend');
     com_idx_hist =  [[max_rg rg_idx]; [max_wb wb_idx]; [max_by by_idx]];
     
 end
