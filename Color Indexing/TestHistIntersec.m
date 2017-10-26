@@ -113,8 +113,13 @@ save('max_idx_hist.mat','max_idx_hist');
 
 %online matching of test image
 load('max_idx_hist.mat');
-maxBins = 15;
+maxBins = 10;
 sMatch = zeros(nImg, nImg);
 for i= 1 : nImg
-   sMatch(i,:) = MatchIncreHistIntersect(max_idx_hist, hist3d{i}, maxBins, nbins3d);
+    %% 1. Sort image histogram by bin size
+    sorted_test_hist = SortedHistBySize(hist3d{i},'descend');
+    %Specify # bin per index(color)
+    color_bins = SetColorBins(maxBins, nbins3d);
+    %% 2. Perform histogram matching
+   sMatch(i,:) = MatchIncreHistIntersect(max_idx_hist, sorted_test_hist, color_bins);
 end
