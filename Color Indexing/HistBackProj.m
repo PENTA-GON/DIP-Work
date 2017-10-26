@@ -5,7 +5,6 @@ function [ ind_x,ind_y ] = HistBackProj( M, I ,r)
 [m,n,~] = size(I);
 
 nbins3d = [16 8 16];
-nbins2d = [16 16];
 
 flag = 0;
 
