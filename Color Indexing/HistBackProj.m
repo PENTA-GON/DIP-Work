@@ -61,11 +61,6 @@ c = max(B1(:));
 [~,ind] = max(B1(:));
 [ind_x, ind_y] = ind2sub([m n],ind);
 
-B2 = B1;
-B2(ind_x,ind_y) = 0;
-[~,ind2] = max(B2(:));
-[ind_x2, ind_y2] = ind2sub([m n],ind2);
-
 theta = linspace(0,2*pi);
 x = r*cos(theta) + ind_x;
 y = r*sin(theta) + ind_y;
@@ -76,7 +71,6 @@ subplot(1,2,1),imshow(M);title('The target');
 subplot(1,2,2),imshow(I),hold on; title('The image');
 
 plot(ind_y,ind_x,'s','color','red');
-plot(ind_y2,ind_x2,'s','color','blue');
 plot(y,x,'color','green');
 
 
