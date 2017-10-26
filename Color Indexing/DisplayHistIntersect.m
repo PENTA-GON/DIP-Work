@@ -39,7 +39,20 @@ set(gca,'xticklabel',{1:1:75});
 set(gca,'ytick',Row); 
 set(gca,'yticklabel',{1:1:75});
 %}
-
+[~, ind]= max(sResults,[],2);
+counts = 1;
+for i = 1:length(ind)
+    if(i ~= ind(i))
+        error(counts) = i;
+        a = sort(sResults(i,:),'descend');
+        b(counts) = find(a == sResults(i,i),1);
+        counts = counts + 1 ;
+    end
+end
+fprintf('There are %d errors here\n', counts - 1);
+for i = 1:(counts-1)
+    fprintf('It is the No.%d image,correct image is the No.%d matched image\n ', error(i),b(i));
+end
 %{
 %% example obtained from web
 M1=[1    1    1    1    1   
