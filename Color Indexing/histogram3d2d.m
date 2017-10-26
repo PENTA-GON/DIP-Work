@@ -1,4 +1,4 @@
-function [ n ] = histogram3d2d( I,nbins,flag, isPlot )
+function [ n,bin ] = histogram3d2d( I,nbins,flag, isPlot )
 % Task1.Create 3D and 2D histogram
 % I: image input; nbins: size of bins; flag: 0-3D histogram and 1-2D histogram
 
@@ -18,8 +18,11 @@ if (flag == 0)
 else 
     r1 = r ./ (r + g + b);
     g1 = g ./(r + g + b);
+    b1 = 1 - r1 - g1;
     
-   w = [r1(:),g1(:)];
+   % w = [r1(:),g1(:)];
+   w = [r1(:),g1(:),b1(:)];
+   nbins = [nbins,nbins(1)];
 end
 
 [nrows,ncols] = size(w);
@@ -27,8 +30,16 @@ end
 bin = zeros(nrows,ncols);
 
 for i = 1:ncols
-    minx = min(w(:,i));
-    maxx = max(w(:,i));
+    %minx = min(w(:,i));
+    %maxx = max(w(:,i));
+    
+    minx = 0;
+    if(flag == 0)
+        maxx = 255;
+    else 
+        maxx = 1.0;
+        %maxx = max(w(:,i));
+    end
     
     % Make histc mimic hist behavior  
     binwidth{i} = (maxx - minx) / nbins(i);
@@ -39,6 +50,8 @@ for i = 1:ncols
     % everything > ctrs(end) gets counted in last bin.
     histcEdges = [-Inf edges{i}(2:end-1) Inf];
     [dum,bin(:,i)] = histc(w(:,i),histcEdges,1);
+    
+    %subscripts begins at 1 
     bin(:,i) = max(bin(:,i),1);
     bin(:,i) = min(bin(:,i),nbins(i));
 end
@@ -56,8 +69,9 @@ C = zeros(len,3);% Color
 
 counts = 1;
 
-if (flag == 0) 
-    Z = zeros(1,len);
+if isPlot
+    if (flag == 0) 
+        Z = zeros(1,len);
     
     for z = 1:nbins(3)
         for y = 1:nbins(2)
@@ -81,7 +95,7 @@ if (flag == 0)
     end 
 
     %figure;
-    if isPlot
+    %if isPlot
         scatter3(X,Y,Z,S,C,'filled','s');%,'MarkerfaceAlpha',0.8); 
 
         axis([0 16 0 8 0 16]);
@@ -97,7 +111,7 @@ if (flag == 0)
         set(gca,'YDir','reverse'); 
 
         view(30,30);
-    end
+    %end
 else
     for y = 1:nbins(2)
         for x = 1:nbins(1)
@@ -128,12 +142,13 @@ else
             end
         end
     end 
-    if isPlot
+    %if isPlot
         scatter(X ,Y ,S,C,'filled','s','MarkerfaceAlpha',0.8); 
         xlabel(['r'' axis [',num2str(edges{1}(1)),',',num2str(edges{1}(nbins(1))),']']);
         ylabel(['g'' axis [',num2str(edges{2}(1)),',',num2str(edges{2}(nbins(2))),']']);
 
         title('2D histogram of color constancy algorithm');
+    %end
     end
 end
 
