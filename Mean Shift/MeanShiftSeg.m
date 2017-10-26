@@ -4,6 +4,10 @@ ht=size(input,1);
 wd=size(input,2);
 output=input;
 
+% store the location of mode
+modeX = [ht * wd];
+modeY = [ht * wd];
+
 clusterR = [ht * wd];
 clusterG = [ht * wd];
 clusterB = [ht * wd];
@@ -18,13 +22,14 @@ tic
 
 for y=1:ht
     for x=1:wd
+        % normalize with Hs & Hr
+        newX = round(single(x) / Hs);
+        newY = round(single(y) / Hs);
         newR = round(single(input(y,x,1)) / Hr);
         newG = round(single(input(y,x,2)) / Hr);
         newB = round(single(input(y,x,3)) / Hr);
-        newX = round(single(x) / Hs);
-        newY = round(single(y) / Hs);
 
-        windowSize = Hs;
+        windowSize = 10;
         r1 = y - windowSize; r2 = y + windowSize;
         c1 = x - windowSize; c2 = x + windowSize;
 
@@ -44,19 +49,19 @@ for y=1:ht
             for li=1:size(patch,1)
                 for lj=1:size(patch,2)
                     
-                    yi = round(single(r1 + li - 1) / Hs);
-                    xi = round(single(c1 + lj - 1) / Hs);
-                    xiR = round(single(patch(li, lj, 1)) / Hr);
-                    xiG = round(single(patch(li, lj, 2)) / Hr);
-                    xiB = round(single(patch(li, lj, 3)) / Hr);
+                    yi = single(r1 + li - 1) / Hs;
+                    xi = single(c1 + lj - 1) / Hs;
+                    xiR = single(patch(li, lj, 1)) / Hr;
+                    xiG = single(patch(li, lj, 2)) / Hr;
+                    xiB = single(patch(li, lj, 3)) / Hr;
 
                     difR = newR - xiR; difG = newG - xiG; difB = newB -xiB;
                     difX = newX - xi; difY = newY - yi;
 
                     % Epanechnikov kernel derivative, basically only consider
                     % point in the hypersphere of radius bandwidth
-                    euclidean = sqrt(difR*difR + difG*difG + difB*difB + difX*difX + difY*difY);
-                    if euclidean < 5
+                    euclidean = sqrt(difX*difX + difY*difY + difR*difR + difG*difG + difB*difB);
+                    if euclidean < Hs
                         accumulateR = accumulateR + xiR;
                         accumulateG = accumulateG + xiG;
                         accumulateB = accumulateB + xiB;
@@ -97,6 +102,8 @@ for y=1:ht
         output(y,x,1) = round(newR);
         output(y,x,2) = round(newG);
         output(y,x,3) = round(newB);
+        modeX(y,x) = newX;
+        modeY(y,x) = newY;
     end    
 end
 
@@ -116,11 +123,11 @@ for y=1:ht
             cDifR = single(clusterR(ci) - r);
             cDifG = single(clusterG(ci) - g);
             cDifB = single(clusterB(ci) - b);
-            cDifX = clusterX(ci) - (x / Hs);
-            cDifY = clusterY(ci) - (y / Hs);
+            cDifX = clusterX(ci) - modeX(y,x);
+            cDifY = clusterY(ci) - modeY(y,x);
             
             cRDist = sqrt(cDifR*cDifR + cDifG*cDifG + cDifB*cDifB + cDifX*cDifX + cDifY*cDifY);
-            if cRDist < 0.5 
+            if cRDist <= 0.5 
                 output(y,x,1) = clusterR(ci) * Hr;
                 output(y,x,2) = clusterG(ci) * Hr;
                 output(y,x,3) = clusterB(ci) * Hr;
@@ -139,8 +146,8 @@ for y=1:ht
             clusterR(clusterSize) = r;
             clusterG(clusterSize) = g;
             clusterB(clusterSize) = b;
-            clusterX(clusterSize) = x / Hs;
-            clusterY(clusterSize) = y / Hs;
+            clusterX(clusterSize) = modeX(y,x);
+            clusterY(clusterSize) = modeY(y,x);
         end
     end
 end

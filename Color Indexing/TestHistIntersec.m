@@ -2,7 +2,7 @@ clear;close all;clc;
 
 % Read 2 images
 I_A = imread('77.jpg');
-I_B = imread('104.jpg');
+I_B = imread('75.jpg');
 
 %% using 1D histogram intersection on  RGB color space
 %{
@@ -40,7 +40,7 @@ subplot(326),plot(bin_wb_A, hist_wb_A, 'r-'); hold on;plot(bin_wb_B, hist_wb_B, 
 grid on; legend('image-A','image-B');
 %}
 %% Using 3d histogram intersection on three opponent color axes
-
+%{
 nbins = [16 8 16];
 flag = 0;
 %convert image into 3D histogram
@@ -78,7 +78,7 @@ for i=1:n_samples
 end
 %}
 
-%% Histogram Intersection
+%% Basic Histogram Intersection
 %{
 isPlot = false;
 for i=1:n_samples 
@@ -89,6 +89,7 @@ end
 save('hist3d.mat', 'hist3d');
 save('hist2d.mat', 'hist2d');
 %}
+%{
 load('hist3d.mat');
 nImg = numel(hist3d);
 for i= 1 : nImg
@@ -96,6 +97,7 @@ for i= 1 : nImg
         sResults(i,j) = HistIntersec(hist3d{i}, hist3d{j});
     end
 end
+
 save('histResults3d.mat', 'sResults');
 
 load('hist2d.mat');
@@ -106,5 +108,31 @@ for i= 1 : nImg
     end
 end
 save('histResults2d.mat', 'sResults');
+
 % To plot histogram intersection results similar to Fig 7
 
+%% Incremental Histogram Intersection
+load('hist3d.mat');
+nImg = numel(hist3d);
+% off-line building of database
+
+isPlot = false;
+max_idx_hist = cell(1,75);
+inc_hist_model = cell(1,75);
+for i= 1 : nImg
+    [max_idx_hist{i}] = BuildHistIncrementIntersect(hist3d{i}, nbins3d);
+end
+save('max_idx_hist.mat','max_idx_hist');
+
+%online matching of test image
+load('max_idx_hist.mat');
+maxBins = 10;
+sMatch = zeros(nImg, nImg);
+for i= 1 : nImg
+    %% 1. Sort image histogram by bin size
+    sorted_test_hist = SortedHistBySize(hist3d{i},'descend');
+    %Specify # bin per index(color)
+    color_bins = SetColorBins(maxBins, nbins3d);
+    %% 2. Perform histogram matching
+   sMatch(i,:) = MatchIncreHistIntersect(max_idx_hist, sorted_test_hist, color_bins);
+end
