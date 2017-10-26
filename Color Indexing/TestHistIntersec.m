@@ -2,7 +2,7 @@ clear;close all;clc;
 
 % Read 2 images
 I_A = imread('77.jpg');
-I_B = imread('104.jpg');
+I_B = imread('75.jpg');
 
 %% using 1D histogram intersection on  RGB color space
 %{
@@ -107,16 +107,14 @@ isPlot = false;
 max_idx_hist = cell(1,75);
 inc_hist_model = cell(1,75);
 for i= 1 : nImg
-    [max_idx_hist{i}, inc_hist_model{i}] = BuildHistIncrementIntersect(hist3d{i}, nbins3d);
+    [max_idx_hist{i}] = BuildHistIncrementIntersect(hist3d{i}, nbins3d);
 end
-save('inc_hist_model.mat', 'inc_hist_model');
 save('max_idx_hist.mat','max_idx_hist');
 
 %online matching of test image
-load('inc_hist_model.mat');
 load('max_idx_hist.mat');
-maxBins = 10;
+maxBins = 15;
 sMatch = zeros(nImg, nImg);
 for i= 1 : nImg
-   sMatch = MatchIncreHistIntersect(max_idx_hist, hist3d{i}, maxBins, nbins3d);
+   sMatch(i,:) = MatchIncreHistIntersect(max_idx_hist, hist3d{i}, maxBins, nbins3d);
 end
