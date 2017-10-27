@@ -86,8 +86,8 @@ end
 isPlot = false;
 for i=1:n_samples 
     I = imread(fullfile(train_folder_name, num2str(cell2mat(filenames(i)))));
-    hist3d{i} = histogram3d2d( I, nbins3d,flag3d, isPlot);
-    hist2d{i} = histogram3d2d( I, nbins2d,flag2d, isPlot);
+    [hist3d{i}, bin_3d] = histogram3d2d( I, nbins3d,flag3d, isPlot);
+    [hist2d{i}, bin_2d] = histogram3d2d( I, nbins2d,flag2d, isPlot);
 end
 save('hist3d.mat', 'hist3d');
 save('hist2d.mat', 'hist2d');
