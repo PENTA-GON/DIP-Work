@@ -68,9 +68,7 @@ function [ sIdx ] = MatchIncreHistIntersect( max_hist_model, max_hist_test, bins
         end   
         %% Compute normalized histogram intersection
         I = [match_prob{1}; match_prob{2}; match_prob{3}];
-        M = [model_bin_prob{1}(1 : mbins3d(1)); model_bin_prob{2}(1 : mbins3d(2)); model_bin_prob{3}(1 : mbins3d(3))]; %Using all M
-        %M = [model_prob{1}; model_prob{2}; model_prob{3}];%Using M(B)
-        %sIdx(1,iModel) = sum(I)/sum(M);
+        M = [model_bin_prob{1}(1 : mbins3d(1)); model_bin_prob{2}(1 : mbins3d(2)); model_bin_prob{3}(1 : mbins3d(3))]; %Using M(B)
         sIdx(1,iModel) = sum(min(I,M))/sum(M); 
     end
 
