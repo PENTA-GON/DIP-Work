@@ -1,4 +1,4 @@
-function [ n,bin ] = histogram3d2d( I,nbins,flag, isPlot )
+function [ n1,bin ] = histogram3d2d( I,nbins,flag, isPlot )
 % Task1.Create 3D and 2D histogram
 % I: image input; nbins: size of bins; flag: 0-3D histogram and 1-2D histogram
 
@@ -33,14 +33,21 @@ for i = 1:ncols
     %minx = min(w(:,i));
     %maxx = max(w(:,i));
     
-    minx = 0;
+    %%{
     if(flag == 0)
-        maxx = 255;
+        if(ncols == 3 && i == 2)
+            minx = 0;
+            maxx = 255 * 3/2;%for wb axis
+        else
+            minx = -255/2;
+            maxx = 255/2;
+        end
     else 
+        minx = 0;
         maxx = 1.0;
         %maxx = max(w(:,i));
     end
-    
+    %}
     % Make histc mimic hist behavior  
     binwidth{i} = (maxx - minx) / nbins(i);
     edges{i} = minx + binwidth{i}*(0:nbins(i));
@@ -58,7 +65,18 @@ end
 
 % Combine the three vectors of 1D bin counts into a grid of 3D bin
 % Counts. A = accumarray(subs,val,sz) If sub = 1 and val = 101,realValue = val-1+sub = 101
-n = accumarray(bin,1,nbins);
+n1 = accumarray(bin,1,nbins);
+
+if(flag == 1)
+    for i = 1:nbins(1)
+        for j  = 1:nbins(2)
+            n(i,j) = sum(n1(i,j,:));
+        end
+    end
+else
+    n = n1;
+end
+
 a = (n>0);
 len = sum(a(:));
 
@@ -118,7 +136,7 @@ else
             if ~n(x,y) == 0
                 X(counts) = x;
                 Y(counts) = y;
-                S(counts) = n(x,y)/10;
+                S(counts) = n(x,y,:)/10;
             
                 j = 1;
                
