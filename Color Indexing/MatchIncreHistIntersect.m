@@ -1,4 +1,4 @@
-function [ sIdx ] = MatchIncreHistIntersect( max_hist_model, test_hist, bins_color )
+function [ sIdx ] = MatchIncreHistIntersect( max_hist_model, max_hist_test, bins_color )
 %UNTITLED4 Summary of this function goes here
 %   Detailed explanation goes here
     %sort test image histogram by size    
@@ -6,86 +6,72 @@ function [ sIdx ] = MatchIncreHistIntersect( max_hist_model, test_hist, bins_col
     sIdx = zeros(1, nModel); %#_test_img x #_model_img (75x75)    
     %% sort test image histogram bins by size
     %Get # bins considered per index(color)
-    n_rg_bins = bins_color(1);
-    n_wb_bins = bins_color(2);
-    n_by_bins = bins_color(3);    
-   
-    %% Go through each model comparison
-    S_RG_IDX = 1;
-    S_WB_IDX = size(test_hist,1)+1;
-    S_BY_IDX = size(test_hist,1)+size(test_hist,2)+1;
+    nbins3d = bins_color(1,:); %16-8-16
+    mbins3d = bins_color(2,:); % B=10 => 4-2-4 %n_rg_bins-n_wb_bins-n_by_bins      
+    %% indexes to go through test image bins & indexes (test_hist=16-8-16)
+    idx_per_color(1,:) = [1 nbins3d(1)]; %rg => 1-16
+    idx_per_color(2,:) = [nbins3d(1)+1 nbins3d(1)+nbins3d(2)]; %wb => 17-24
+    idx_per_color(3,:) = [nbins3d(1)+nbins3d(2)+1 nbins3d(1)+nbins3d(2)+nbins3d(3)]; %by=>25-40
+    
     %% 2. Find mached histogram bins between model and test images
     for iModel= 1 : nModel
-        for iColor=1 : size(bins_color)
-            
-        end
-        %% compare with model bins for rg index         
-        model_rg_prob = max_hist_model{iModel}(S_RG_IDX:n_rg_bins,1);
-        test_rg_prob = sorted_rg_bin;
-        
-        model_rg_idx = max_hist_model{iModel}(S_RG_IDX:n_rg_bins,2); %index
-        test_rg_idx = sorted_rg_idx(1:n_rg_bins);
-        
-        matched_idx = find(test_rg_idx == model_rg_idx);
-        if numel(matched_idx) ~= n_rg_bins %unmatched bins in larger key values
-            %get those bins not matched with test image
-            unmatched_idx = find(test_rg_idx ~= model_rg_idx);   
-            %processing for unmatched index
-            %1) simply using index from model%test_rg_idx = [matched_idx; model_rg_idx(unmatched_idx)];
-            %2) Compare and choose larger bins
-            for j=1 : numel(unmatched_idx)
-                if ~ismember(unmatched_idx(j), matched_idx) %not the same as matched idx
-                    if( model_rg_prob(model_rg_idx(unmatched_idx(j)))> test_rg_prob(test_rg_idx(unmatched_idx(j))))
-                        matched_idx = [sorted_rg_bin(matched_idx); model_rg_idx(unmatched_idx(j))];
-                    else
-                        matched_idx = [sorted_rg_bin(matched_idx); test_rg_idx(unmatched_idx(j))];
+        for iColor=1 : size(nbins3d,2) %3 colors: rg-wb-by
+            %Model image idx and prob per Color
+            model_bin_prob{iColor} = max_hist_model{iModel}(idx_per_color(iColor,1): idx_per_color(iColor,2), 1);
+            model_bin_idx{iColor} = max_hist_model{iModel}(idx_per_color(iColor,1): idx_per_color(iColor,2), 2);
+            %Test Image idx and prob per Color
+            test_bin_prob = max_hist_test(idx_per_color(iColor,1): idx_per_color(iColor,2), 1);
+            test_bin_idx= max_hist_test(idx_per_color(iColor,1): idx_per_color(iColor,2), 2);
+            % idx of selected # bins according to given B (B=10 in example)
+            model_idx{iColor} = model_bin_idx{iColor}(1 : mbins3d(iColor)); 
+            test_idx{iColor} = test_bin_idx(1 : mbins3d(iColor)); 
+            %Resultant matching idx and prob for B bins per index(Color)
+            match_idx{iColor} = zeros(mbins3d(iColor),1);
+            match_prob{iColor} = zeros(mbins3d(iColor),1);
+            model_prob{iColor} = zeros(mbins3d(iColor),1);
+            %matching index between test and model image bins
+            matched_bins = find(test_idx{iColor} == model_idx{iColor});
+            %Condition if NOT all bins are matched
+            if numel(matched_bins) ~= mbins3d(iColor)
+                %Assign those partially matched indexes
+                match_idx{iColor} = test_bin_idx(matched_bins);
+                %Find indexes of unmatched bins
+                unmatched_bins = find(test_idx{iColor} ~= model_idx{iColor}); 
+                for i=1 : numel(unmatched_bins)
+                    if ~ismember(test_bin_idx(unmatched_bins(i)), match_idx{iColor})
+                        if ~ismember(model_idx{iColor}(unmatched_bins(i)), match_idx{iColor})
+                            if model_bin_prob{iColor}(model_idx{iColor}(unmatched_bins(i))) > test_bin_prob(test_idx{iColor}(unmatched_bins(i)))
+                                match_idx{iColor} = [match_idx{iColor}; model_idx{iColor}(unmatched_bins(i))];
+                            else
+                                match_idx{iColor} = [match_idx{iColor}; test_idx{iColor}(unmatched_bins(i))];
+                            end
+                        else
+                             match_idx{iColor} = [match_idx{iColor}; test_idx{iColor}(unmatched_bins(i))];
+                        end        
+                    else %Included in current matched bins
+                        match_idx{iColor} = [match_idx{iColor}; model_idx{iColor}(unmatched_bins(i))];
                     end
-                else
-                    model_rg_idx
                 end
+            else %Condition if ALL bins are matched
+                match_idx{iColor} = matched_bins;                
             end
-        else
-            test_rg_idx = matched_idx;
-        end
-        %Required Prob using RG Idx        
-        for k=1 : numel(test_rg_idx)
-            match_rg_prob(k,1) = sorted_rg_bin(test_rg_idx(k));
-        end
-        %% Compare with model bins for wb index
-%         model_wb_idx = max_hist_model{iModel}(S_WB_IDX:S_WB_IDX+(n_wb_bins-1),2);
-%         test_wb_idx = sorted_wb_idx(1:n_wb_bins);
-%         matched_idx = find(test_wb_idx == model_wb_idx);
-%         if numel(matched_idx) ~= n_wb_bins
-%             unmatched_idx = find(test_wb_idx ~= model_wb_idx);
-%             %TODO to replace with id from matched model bins
-%             test_wb_idx = [matched_idx; model_wb_idx(unmatched_idx)];
-%         else
-%            test_wb_idx = matched_idx; 
-%         end
-%         model_wb_prob =  max_hist_model{iModel}(S_WB_IDX:S_WB_IDX+(n_wb_bins-1),1);
-%         test_wb_prob = zeros(numel(model_wb_prob),1);
-%         for k=1 : numel(test_wb_prob)
-%            test_wb_prob(k,1) = sorted_wb_bin(test_wb_idx(k)); 
-%         end
-        %% Compare with model bins for by index
-%         model_by_idx = max_hist_model{iModel}(S_BY_IDX:S_BY_IDX+(n_by_bins-1),2);
-%         test_by_idx = sorted_by_idx(1:n_by_bins);
-%         matched_idx = find(test_by_idx == model_by_idx);
-%         if numel(matched_idx) ~= n_by_bins
-%             unmatched_idx = find(test_by_idx ~= model_by_idx);
-%             test_by_idx = [matched_idx; model_by_idx(unmatched_idx)];
-%         else
-%             test_by_idx = matched_idx;
-%         end
-%         model_by_prob = max_hist_model{iModel}(S_BY_IDX:S_BY_IDX+(n_by_bins-1),1);
-%         test_by_prob = zeros(numel(model_by_prob),1);
-%         for k=1: numel(test_by_prob)
-%            test_by_prob(k,1) = sorted_by_bin(test_by_idx(k)); 
-%         end
+            match_bin_idx = match_idx{iColor};
+            for j=1 : numel(match_bin_idx)               
+                %Get match prob according to match idx of bins
+                if test_bin_prob(match_bin_idx(j)) < model_bin_prob{iColor}(match_bin_idx(j))
+                    match_prob{iColor}(j) = test_bin_prob(match_bin_idx(j));
+                else
+                    match_prob{iColor}(j) = model_bin_prob{iColor}(match_bin_idx(j));
+                end
+                model_prob{iColor}(j) = model_bin_prob{iColor}(match_bin_idx(j));
+            end
+        end   
         %% Compute normalized histogram intersection
-        I = [match_rg_prob; match_wb_prob; match_by_prob];
-        M = [model_rg_prob; model_wb_prob; model_by_prob];
-        sIdx(1,iModel) = sum(min(I,M))/sum(M);
+        I = [match_prob{1}; match_prob{2}; match_prob{3}];
+        M = [model_bin_prob{1}(1 : mbins3d(1)); model_bin_prob{2}(1 : mbins3d(2)); model_bin_prob{3}(1 : mbins3d(3))]; %Using all M
+        %M = [model_prob{1}; model_prob{2}; model_prob{3}];%Using M(B)
+        %sIdx(1,iModel) = sum(I)/sum(M);
+        sIdx(1,iModel) = sum(min(I,M))/sum(M); 
     end
 
 end

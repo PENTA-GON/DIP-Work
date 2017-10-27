@@ -6,23 +6,28 @@ numC = size(sResults,2);
 Row = [1:1:numR];
 [col,row] = meshgrid(Row); %only use x
 %myCol='byr'; %'MarkerFaceColor',myCol(1),
-
-figure;
+X = zeros(1,numR*numC);
+Y = zeros(1,numR*numC);
+counts = 1;
 for i=1: numR
    for j=1 : numC
-       h = scatter(col(i,j), row(i,j), sResults{i,j}*20, 's',...
-           'MarkerEdgeColor',[0 0 1],...
-           'MarkerFaceColor',[0 0 1]);
-       hold on;
+      X(counts) = i;
+      Y(counts) = j;
+      counts = counts + 1;
    end
 end
-%trying to change 
+
+figure;
+scatter(X, Y, sResults(:)*100, 's','filled');
+
+%trying to change figure properties
  xticks(Row);xtickangle(45);
  xticklabels({1:1:75});
  yticks(Row);
  yticklabels({1:1:75});
  set(gca, 'XAxisLocation','top','YAxisLocation','left','ydir','reverse');
- 
+ xlabel('Model Images');
+ ylabel('Test Images');
 %%axis setting for R2016a
 %{
 set(gca, 'XAxisLocation','top','YAxisLocation',...
