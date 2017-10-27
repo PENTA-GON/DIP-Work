@@ -35,12 +35,16 @@ for i = 1:ncols
     
     %%{
     if(flag == 0)
-        if(ncols == 3 && i == 2)
+        if(ncols == 3 && i == 2)%for wb axis
             minx = 0;
-            maxx = 255 * 3/2;%for wb axis
-        else
-            minx = -255/2;
-            maxx = 255/2;
+            maxx = 255 * 3  * 0.55 ;
+            
+        elseif(ncols == 3 && i == 3)%for by axis
+            minx = -255 * 2  * 0.55  ;
+            maxx = 255 * 2 * 0.55 ;
+        else   %for rg axis
+            minx = -255  * 0.55 ;
+            maxx = 255 * 0.55 ;
         end
     else 
         minx = 0;
