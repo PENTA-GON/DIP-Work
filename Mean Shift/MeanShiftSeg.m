@@ -1,19 +1,24 @@
-function output = MeanShiftSeg(input, Hs, Hr, Bandwidth)
+function output = MeanShiftSeg(input, Hs, Hr, M)
 
 ht=size(input,1);
 wd=size(input,2);
 output=input;
 
 % store the location of mode
-modeX = [ht * wd];
-modeY = [ht * wd];
+size_ = ht * wd;
+limit = 4048;
+modeX = [size_];
+modeY = [size_];
 
-clusterR = [ht * wd];
-clusterG = [ht * wd];
-clusterB = [ht * wd];
-clusterX = [ht * wd];
-clusterY = [ht * wd];
+clusterR = [size_];
+clusterG = [size_];
+clusterB = [size_];
+clusterX = [size_];
+clusterY = [size_];
+
 clusterSize = 0;
+clusterMemberSize = [size_];
+clusterMember = repmat(0, [limit*2 limit 2]);
 
 figure(1);
 
@@ -29,9 +34,11 @@ for y=1:ht
         newG = round(single(input(y,x,2)) / Hr);
         newB = round(single(input(y,x,3)) / Hr);
 
-        windowSize = 10;
-        r1 = y - windowSize; r2 = y + windowSize;
-        c1 = x - windowSize; c2 = x + windowSize;
+        windowSize = Hs;
+        shiftX = x; % newX * Hs;
+        shiftY = y; % newY * Hs;
+        r1 = shiftY - windowSize; r2 = shiftY + windowSize;
+        c1 = shiftX - windowSize; c2 = shiftX + windowSize;
 
         % check boundaries of the region
         if (r1<1) r1 = 1 ; end
@@ -40,15 +47,15 @@ for y=1:ht
         if (c2>wd) c2 = wd ; end 
 
         patch=input(r1:r2,c1:c2,:);
-
+        
         dist = 1;
-        while(dist > 0.5)
+        while(dist > 0.2)
             withinCount = 0;
             accumulateR = 0; accumulateG = 0; accumulateB = 0;
             accumulateX = 0; accumulateY = 0;
             for li=1:size(patch,1)
                 for lj=1:size(patch,2)
-                    
+                    % normalize with Hs & Hr
                     yi = single(r1 + li - 1) / Hs;
                     xi = single(c1 + lj - 1) / Hs;
                     xiR = single(patch(li, lj, 1)) / Hr;
@@ -60,8 +67,9 @@ for y=1:ht
 
                     % Epanechnikov kernel derivative, basically only consider
                     % point in the hypersphere of radius bandwidth
-                    euclidean = sqrt(difX*difX + difY*difY + difR*difR + difG*difG + difB*difB);
-                    if euclidean < Hs
+                    euclideanR = sqrt(difX*difX + difY*difY + difR*difR);
+                    euclideanS = sqrt(difG*difG + difB*difB);
+                    if euclideanR < Hr && euclideanS < Hs
                         accumulateR = accumulateR + xiR;
                         accumulateG = accumulateG + xiG;
                         accumulateB = accumulateB + xiB;
@@ -131,6 +139,12 @@ for y=1:ht
                 output(y,x,1) = clusterR(ci) * Hr;
                 output(y,x,2) = clusterG(ci) * Hr;
                 output(y,x,3) = clusterB(ci) * Hr;
+                
+                % store membership id of cluster
+                clusterMemberSize(ci) = clusterMemberSize(ci) + 1;
+                clusterMember(ci,clusterMemberSize(ci), 1) = x;
+                clusterMember(ci,clusterMemberSize(ci), 2) = y;
+                
                 clusterFound = true;
                 break;
             end
@@ -148,7 +162,63 @@ for y=1:ht
             clusterB(clusterSize) = b;
             clusterX(clusterSize) = modeX(y,x);
             clusterY(clusterSize) = modeY(y,x);
+            
+            % store membership id of cluster
+            clusterMemberSize(clusterSize) = 1;
+            clusterMember(clusterSize,1, 1) = x;
+            clusterMember(clusterSize,clusterMemberSize(ci), 2) = y;
         end
+    end
+end
+
+% merge the small cluster
+for ci=1:clusterSize
+    if(clusterMemberSize(ci) < M)
+        r = clusterR(ci);
+        g = clusterG(ci);
+        b = clusterB(ci);
+        x = clusterX(ci);
+        y = clusterY(ci);
+        
+        % find the nearest cluster and merge with it
+        newCluster = ci;
+        nearestDist = 100000;
+        for ci2=1:clusterSize
+            if(ci ~= ci2 && clusterMemberSize(c2) ~= 0)
+                difR = r - clusterR(ci2);
+                difG = g - clusterG(ci2);
+                difB = b - clusterB(ci2);
+                difX = x - clusterX(ci2);
+                difY = y - clusterY(ci2);
+
+                euclidean = sqrt(difR*difR + difG*difG + difB*difB + difX*difX + difY*difY);    
+                % this cluster is close by
+                if(euclidean < nearestDist)
+                    newCluster = ci2;
+                    nearestDist = euclidean;
+                end
+            end
+        end
+        
+        % found the new cluster to merge into
+        for memberId=1 : clusterMemberSize(ci)
+            memberX = clusterMember(ci, memberId, 1);
+            memberY = clusterMember(ci, memberId, 2);
+            
+            if (memberX ~= 0 && memberY ~= 0)
+                output(memberY,memberX,1) = clusterR(newCluster) * Hr;
+                output(memberY,memberX,2) = clusterG(newCluster) * Hr;
+                output(memberY,memberX,3) = clusterB(newCluster) * Hr;
+                
+                % store membership id of cluster
+                clusterMemberSize(newCluster) = clusterMemberSize(newCluster) + 1;
+                clusterMember(newCluster,clusterMemberSize(newCluster), 1) = memberX;
+                clusterMember(newCluster,clusterMemberSize(newCluster), 2) = memberY;
+            end
+        end
+        
+        % clear the old cluster
+        clusterMemberSize(ci) = 0;
     end
 end
 
