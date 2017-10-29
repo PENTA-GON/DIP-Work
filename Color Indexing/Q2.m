@@ -12,7 +12,7 @@ nbins3d = [16 8 16]; % # bins per color
 flag3d = 0;
 nbins2d = [8 8]; % # bins per color
 flag2d = 1;
-plotScale = 100;
+plotScale = 50;
 %% Histogram creations using opponent color spaces
 isPlot = false; %No histogram plotting
 for i=1:n_samples 
@@ -31,7 +31,7 @@ nImg = numel(hist3d);
 sResults3d = zeros(nImg, nImg);
 for i= 1 : nImg
     for j=1 : nImg
-        sResults3d(i,j) = HistIntersec_3D(hist3d{i}, hist3d{j});
+        sResults3d(i,j) = HistIntersec(hist3d{i}, hist3d{j});
     end
 end
 %save('histResults3d.mat', 'sResults3d');
