@@ -1,4 +1,4 @@
-function [ n1,bin ] = histogram3d2d( I,nbins,flag, isPlot )
+function [ n,bin ] = histogram3d2d( I,nbins,flag, isPlot )
 % Task1.Create 3D and 2D histogram
 % I: image input; nbins: size of bins; flag: 0-3D histogram and 1-2D histogram
 
