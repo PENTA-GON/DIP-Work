@@ -23,7 +23,16 @@ scatter(X, Y, sResults(:)*scale, 's','filled');
  xticklabels({1:1:75});
  yticks(Row);
  yticklabels({1:1:75});
+ 
+ %axis setting for R2016a
+%{
+  set(gca,'xtick',Row); 
+  set(gca,'xticklabel',{1:1:75});
+  set(gca,'ytick',Row); 
+  set(gca,'yticklabel',{1:1:75});
+%}
  set(gca, 'XAxisLocation','top','YAxisLocation','left','ydir','reverse');
  xlabel('Model Images');
  ylabel('Test Images');
+ 
 end
