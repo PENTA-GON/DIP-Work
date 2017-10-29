@@ -33,25 +33,24 @@ for i = 1:ncols
     %minx = min(w(:,i));
     %maxx = max(w(:,i));
     
-    %%{
     if(flag == 0)
         if(ncols == 3 && i == 2)%for wb axis
-            minx = 0;
-            maxx = 255 * 3  * 0.55 ;
+            minx = 0 ;
+            maxx = 255 * 3  * 0.65;
             
         elseif(ncols == 3 && i == 3)%for by axis
             minx = -255 * 2  * 0.55  ;
             maxx = 255 * 2 * 0.55 ;
         else   %for rg axis
-            minx = -255  * 0.55 ;
-            maxx = 255 * 0.55 ;
+            minx = -255  * 0.5 ;
+            maxx = 255 * 0.5 ;
         end
     else 
         minx = 0;
         maxx = 1.0;
-        %maxx = max(w(:,i));
     end
-    %}
+ 
+    
     % Make histc mimic hist behavior  
     binwidth{i} = (maxx - minx) / nbins(i);
     edges{i} = minx + binwidth{i}*(0:nbins(i));
@@ -116,15 +115,13 @@ if isPlot
         end
     end 
 
-    %figure;
-    %if isPlot
         scatter3(X,Y,Z,S,C,'filled','s');%,'MarkerfaceAlpha',0.8); 
 
         axis([0 16 0 8 0 16]);
 
-        xlabel(['rg axis [',num2str(round(edges{1}(1))),',',num2str(round(edges{1}(nbins(1)))),']']);
-        ylabel(['wb axis [',num2str(round(edges{2}(1))),',',num2str(round(edges{2}(nbins(2)))),']']);
-        zlabel(['by axis [',num2str(round(edges{3}(1))),',',num2str(round(edges{3}(nbins(3)))),']']);
+        xlabel(['rg axis [',num2str(round(edges{1}(1))),',',num2str(round(edges{1}(nbins(1) + 1))),']']);
+        ylabel(['wb axis [',num2str(round(edges{2}(1))),',',num2str(round(edges{2}(nbins(2) + 1))),']']);
+        zlabel(['by axis [',num2str(round(edges{3}(1))),',',num2str(round(edges{3}(nbins(3) + 1))),']']);
         title('3D histogram of three opponent color axes');
 
         box on
@@ -133,7 +130,7 @@ if isPlot
         set(gca,'YDir','reverse'); 
 
         view(30,30);
-    %end
+
 else
     for y = 1:nbins(2)
         for x = 1:nbins(1)
@@ -164,13 +161,11 @@ else
             end
         end
     end 
-    %if isPlot
         scatter(X ,Y ,S,C,'filled','s','MarkerfaceAlpha',0.8); 
-        xlabel(['r'' axis [',num2str(edges{1}(1)),',',num2str(edges{1}(nbins(1))),']']);
-        ylabel(['g'' axis [',num2str(edges{2}(1)),',',num2str(edges{2}(nbins(2))),']']);
+        xlabel(['r'' axis [',num2str(edges{1}(1)),',',num2str(edges{1}(nbins(1) + 1)),']']);
+        ylabel(['g'' axis [',num2str(edges{2}(1)),',',num2str(edges{2}(nbins(2) + 1)),']']);
 
         title('2D histogram of color constancy algorithm');
-    %end
     end
 end
 
