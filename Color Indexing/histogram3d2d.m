@@ -18,11 +18,12 @@ if (flag == 0)
 else 
     r1 = r ./ (r + g + b);
     g1 = g ./(r + g + b);
-    b1 = 1 - r1 - g1;
+    w = [r1(:),g1(:)];
     
-   % w = [r1(:),g1(:)];
-   w = [r1(:),g1(:),b1(:)];
-   nbins = [nbins,nbins(1)];
+   %Adding b channel will improve the intersection result 
+   %b1 = 1 - r1 - g1;
+   %w = [r1(:),g1(:),b1(:)];
+   %nbins = [nbins,nbins(1)];
 end
 
 [nrows,ncols] = size(w);
@@ -33,14 +34,16 @@ for i = 1:ncols
     %minx = min(w(:,i));
     %maxx = max(w(:,i));
     
+    %set the range of each axis
     if(flag == 0)
         if(ncols == 3 && i == 2)%for wb axis
             minx = 0 ;
             maxx = 255 * 3  * 0.65;
             
         elseif(ncols == 3 && i == 3)%for by axis
-            minx = -255 * 2  * 0.55  ;
-            maxx = 255 * 2 * 0.55 ;
+            minx = -255 * 2  * 0.5  ;
+            maxx = 255 * 2 * 0.5 ;
+            
         else   %for rg axis
             minx = -255  * 0.5 ;
             maxx = 255 * 0.5 ;
@@ -53,23 +56,24 @@ for i = 1:ncols
     
     % Make histc mimic hist behavior  
     binwidth{i} = (maxx - minx) / nbins(i);
-    edges{i} = minx + binwidth{i}*(0:nbins(i));
-    ctrs{i} = edges{i}(1:nbins(i)) + binwidth{i}/2;
+    edges{i} = minx + binwidth{i}*(0:nbins(i));%range of each bin
+    ctrs{i} = edges{i}(1:nbins(i)) + binwidth{i}/2;%centers of bins
 
-    % everything < ctrs(1) gets counted in first bin, 
-    % everything > ctrs(end) gets counted in last bin.
+    % everything < edges(1) gets counted in first bin, 
+    % everything > edges(end) gets counted in last bin.
     histcEdges = [-Inf edges{i}(2:end-1) Inf];
     [dum,bin(:,i)] = histc(w(:,i),histcEdges,1);
     
-    %subscripts begins at 1 
+    %bin label should range from 1 to nbins(i)
     bin(:,i) = max(bin(:,i),1);
     bin(:,i) = min(bin(:,i),nbins(i));
 end
 
 % Combine the three vectors of 1D bin counts into a grid of 3D bin
 % Counts. A = accumarray(subs,val,sz) If sub = 1 and val = 101,realValue = val-1+sub = 101
-n1 = accumarray(bin,1,nbins);
+n = accumarray(bin,1,nbins);
 
+%{
 if(flag == 1)
     for i = 1:nbins(1)
         for j  = 1:nbins(2)
@@ -79,6 +83,7 @@ if(flag == 1)
 else
     n = n1;
 end
+%}
 
 a = (n>0);
 len = sum(a(:));
@@ -104,9 +109,9 @@ if isPlot
                     S(counts) = n(x,y,z)/10;
             
                     % Using inverse function to calculate the original color
-                    R = uint8(1/2 * edges{1}(x)+ 1/3 * edges{2}(y) - 1/6 * edges{3}(z));
-                    G = uint8(-1/2 * edges{1}(x)+ 1/3 * edges{2}(y) - 1/6 * edges{3}(z));
-                    B = uint8(1/3 * edges{2}(y) + 1/3 * edges{3}(z));
+                    R = uint8(1/2 * ctrs{1}(x)+ 1/3 * ctrs{2}(y) - 1/6 * ctrs{3}(z));
+                    G = uint8(-1/2 * ctrs{1}(x)+ 1/3 * ctrs{2}(y) - 1/6 * ctrs{3}(z));
+                    B = uint8(1/3 * ctrs{2}(y) + 1/3 * ctrs{3}(z));
                     C(counts,:) = [im2double(R),im2double(G),im2double(B)];
                
                     counts = counts + 1;
@@ -139,23 +144,28 @@ else
                 Y(counts) = y;
                 S(counts) = n(x,y,:)/10;
             
-                j = 1;
                
                 % Because different colors may have same r' and g'
-                % Average color within each bin is used in here 
+                % Averaging the colors within each bin is used in here 
+                j = 1;
                 for i = 1:size(bin,1)
                     if(bin(i,1) == x && bin(i,2) == y)
+                        %record the pixels address
                         [ind(j,1),ind(j,2)] = ind2sub(size(I),i);
+                        %record the color of the pixel
+                        c(j,1) = I(ind(j,1),ind(j,2),1);
+                        c(j,2) = I(ind(j,1),ind(j,2),2);
+                        c(j,3) = I(ind(j,1),ind(j,2),3);
                         j = j + 1;
                     end
                 end
                 
                 if(size(ind,1)~= 1)
-                    c = uint8(mean(ind));
+                    c_ave = uint8(mean(c));
                 else% only one pixel within bin(x,y) 
-                    c = ind;
+                    c_ave = c;
                 end
-                C(counts,:)= im2double(uint8(I(c(1),c(2),:)));
+                C(counts,:)= im2double(uint8(c_ave));
                 
                 counts = counts + 1;
             end
@@ -164,7 +174,7 @@ else
         scatter(X ,Y ,S,C,'filled','s','MarkerfaceAlpha',0.8); 
         xlabel(['r'' axis [',num2str(edges{1}(1)),',',num2str(edges{1}(nbins(1) + 1)),']']);
         ylabel(['g'' axis [',num2str(edges{2}(1)),',',num2str(edges{2}(nbins(2) + 1)),']']);
-
+        
         title('2D histogram of color constancy algorithm');
     end
 end
