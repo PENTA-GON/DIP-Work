@@ -12,9 +12,11 @@ nbins3d = [16 8 16]; % # bins per color
 flag3d = 0;
 nbins2d = [8 8]; % # bins per color
 flag2d = 1;
-plotScale = 50;
+plotScale = 80;
 %% Histogram creations using opponent color spaces
 isPlot = false; %No histogram plotting
+hist3d = cell(1, n_samples); hist3d(:) = {0};
+hist2d = cell(1, n_samples); hist2d(:) = {0};
 for i=1:n_samples 
     I = imread(fullfile(train_folder_name, num2str(cell2mat(filenames(i)))));
     [hist3d{i}, bin_3d] = histogram3d2d( I, nbins3d,flag3d, isPlot);
@@ -41,21 +43,23 @@ set(gcf, 'NumberTitle', 'off');
 set(gcf, 'Name', 'Histogram Intersection using 3D Histogram');
 title('Histogram Intersection using 3D Histogram');
     
-%% Basic Histogram Intersection (2d histogram)
+%% Basic Histogram Intersection (color constance 2d histogram)
 %load('hist2d.mat');
 nImg = numel(hist2d);
 sResults2d = zeros(nImg, nImg);
+%tic;
 for i= 1 : nImg
     for j=1 : nImg
         sResults2d(i,j) = HistIntersec(hist2d{i}, hist2d{j});
     end
 end
+%toc;
 %save('histResults2d.mat', 'sResults2d');
 % Plot histogram intersection results similar to Fig 7
 ShowHistIntersectResults(sResults2d, plotScale);
 set(gcf, 'NumberTitle', 'off');
-set(gcf, 'Name', 'Histogram Intersection using 2D Histogram');
-title('Histogram Intersection using 2D Histogram');
+set(gcf, 'Name', 'Histogram Intersection using Color Constancy 2D Histogram');
+title('Histogram Intersection using Color Constancy 2D Histogram');
 
 %% Incremental Histogram Intersection
 %load('hist3d.mat');
@@ -73,6 +77,7 @@ end
 %load('max_idx_hist.mat');
 maxBins = 10;
 sMatch = zeros(nImg, nImg);
+%tic;
 for i= 1 : nImg
     %% 1. Sort image histogram by bin size
     sorted_test_hist = SortedHistBySize(hist3d{i},'descend');
@@ -81,6 +86,7 @@ for i= 1 : nImg
     %% 2. Perform histogram matching
    sMatch(i,:) = MatchIncreHistIntersect(max_idx_hist, sorted_test_hist, color_bins);
 end
+%toc;
 % Plot incremental histogram intersection results
 ShowHistIntersectResults(sMatch, plotScale);
 set(gcf, 'NumberTitle', 'off');
