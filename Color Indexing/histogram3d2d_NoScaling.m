@@ -31,27 +31,8 @@ end
 bin = zeros(nrows,ncols);
 
 for i = 1:ncols
-    %minx = min(w(:,i));
-    %maxx = max(w(:,i));
-    
-    %set the range of each axis
-    if(flag == 0)
-        if(ncols == 3 && i == 2)%for wb axis
-            minx = 0 ;
-            maxx = 255 * 3  * 0.65;
-            
-        elseif(ncols == 3 && i == 3)%for by axis
-            minx = -255 * 2  * 0.5  ;
-            maxx = 255 * 2 * 0.5 ;
-            
-        else   %for rg axis
-            minx = -255  * 0.5 ;
-            maxx = 255 * 0.5 ;
-        end
-    else 
-        minx = 0;
-        maxx = 1.0;
-    end
+    minx = min(w(:,i));
+    maxx = max(w(:,i));
  
     
     % Make histc mimic hist behavior  
