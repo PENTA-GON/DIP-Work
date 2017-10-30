@@ -7,6 +7,16 @@ filenames=dir(fullfile(train_folder_name,'*.jpg'));
 filenames={filenames.name};
 n_samples=numel(filenames);
 
+%tic;
+figure;
+iPlot=1;
+for i=1:n_samples  
+    %% Display image
+    I = imread(fullfile(train_folder_name, num2str(cell2mat(filenames(i)))));
+    subplot(8,10, iPlot);imshow(I); title(num2str(cell2mat(filenames(i))));
+    iPlot = iPlot + 1;
+end
+%toc;
 % Specifying parameters of 3D and 2D histograms
 %nbins3d = [32 16 32]; 
 nbins3d = [16 8 16]; %% # bins per color
