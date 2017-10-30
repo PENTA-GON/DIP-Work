@@ -8,7 +8,8 @@ filenames={filenames.name};
 n_samples=numel(filenames);
 
 % Specifying parameters of 3D and 2D histograms
-nbins3d = [16 8 16]; % # bins per color
+%nbins3d = [32 16 32]; 
+nbins3d = [16 8 16]; %% # bins per color
 flag3d = 0;
 nbins2d = [8 8]; % # bins per color
 flag2d = 1;
@@ -40,8 +41,8 @@ end
 % Plot histogram intersection results similar to Fig 7
 ShowHistIntersectResults(sResults3d, plotScale);
 set(gcf, 'NumberTitle', 'off');
-set(gcf, 'Name', 'Histogram Intersection using 3D Histogram');
-title('Histogram Intersection using 3D Histogram');
+set(gcf, 'Name', strcat('Histogram Intersection using 3D Histogram: (', num2str(nbins3d),')'));
+title(strcat('Histogram Intersection using 3D Histogram: # bins (', num2str(nbins3d),')'));
     
 %% Basic Histogram Intersection (color constance 2d histogram)
 %load('hist2d.mat');
@@ -58,8 +59,8 @@ end
 % Plot histogram intersection results similar to Fig 7
 ShowHistIntersectResults(sResults2d, plotScale);
 set(gcf, 'NumberTitle', 'off');
-set(gcf, 'Name', 'Histogram Intersection using Color Constancy 2D Histogram');
-title('Histogram Intersection using Color Constancy 2D Histogram');
+set(gcf, 'Name', strcat('Histogram Intersection using Color Constancy 2D Histogram: (', num2str(nbins2d),')'));
+title(strcat('Histogram Intersection using Color Constancy 2D Histogram: (', num2str(nbins2d),')'));
 
 %% Incremental Histogram Intersection
 %load('hist3d.mat');
@@ -90,5 +91,5 @@ end
 % Plot incremental histogram intersection results
 ShowHistIntersectResults(sMatch, plotScale);
 set(gcf, 'NumberTitle', 'off');
-set(gcf, 'Name', 'Incremental Histogram Intersection using 3D Histogram');
-title('Incremental Histogram Intersection using 3D Histogram');
+set(gcf, 'Name', strcat('Incremental Histogram Intersection using 3D Histogram: (', num2str(nbins3d),')'));
+title(strcat('Incremental Histogram Intersection using 3D Histogram: (', num2str(nbins3d),')'));
