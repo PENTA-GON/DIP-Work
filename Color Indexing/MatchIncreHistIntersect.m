@@ -63,7 +63,7 @@ function [ sIdx ] = MatchIncreHistIntersect( max_hist_model, max_hist_test, bins
                 else
                     match_prob{iColor}(j) = model_bin_prob{iColor}(match_bin_idx(j));
                 end
-                model_prob{iColor}(j) = model_bin_prob{iColor}(match_bin_idx(j));
+                %model_prob{iColor}(j) = model_bin_prob{iColor}(match_bin_idx(j));
             end
         end   
         %% Compute normalized histogram intersection
