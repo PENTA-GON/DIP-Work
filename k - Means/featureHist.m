@@ -1,4 +1,4 @@
-function [ featHist ] = featureHist( img, train_aver,k)
+function [ featHist ] = featureHist( img, train_aver,k, isPlot)
 %calculate the histogram of visual tokens for an image
 
 featHist = zeros(k,1);
@@ -18,17 +18,16 @@ for i = 1:size(img,2)
     featHist(min_ind) = featHist(min_ind) + 1;
 end
 
-figure;
-set(gcf, 'Name', 'Histogram of visual tokens');
-title('Histogram of visual tokens');
+if isPlot
+    figure;
+    set(gcf, 'Name', 'Histogram of visual tokens');
+    title('Histogram of visual tokens');
 
-bar(featHist);
-axis([0 200 0 inf])
-xlabel('Visual token vocabulary[1,200]');
-ylabel('Frequency');
-
-
-
+    bar(featHist);
+    axis([0 200 0 inf])
+    xlabel('Visual token vocabulary[1,200]');
+    ylabel('Frequency');
+end
 
 end
 
