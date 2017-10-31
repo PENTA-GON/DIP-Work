@@ -1,4 +1,4 @@
-clear;close all;clc;
+%clear;close all;clc;
 
 %% Q1.preparate the dataset
 %%{
@@ -22,6 +22,7 @@ test_filenames = {test_filenames.name};
 test_n_samples = numel(test_filenames);
 
 nb_new = 100; %number of chosen features
+%
 %{
 train_data = featSelect(fullfile(train_sift_dir, num2str(cell2mat(train_filenames(1)))),nb_new);
 test_data = featSelect(fullfile(test_sift_dir, num2str(cell2mat(test_filenames(1)))),nb_new);
@@ -38,9 +39,13 @@ save('train_data.mat', 'train_data');
 save('test_data.mat', 'test_data');
 %}
 %% Q2.k-means clustering
-%%{
+%
+%{
 load('train_data.mat', 'train_data');
 load('test_data.mat', 'test_data');
+
+train_n_samples = 200;
+test_n_samples = 100;
 
 k = 200;
 [train_counts, train_aver, train_record] = k_means( train_data,k );
@@ -55,9 +60,10 @@ error = sum(test_aver(:,1)-b);
 
 %}
 %% Q3.Calculate the histogram of visual tokens
-img = test_data(:,1:100); %1st test image
-featHist = featureHist( img, train_aver,k, true);
+%img = test_data(:,1:100); %1st test image
+%featHist = featureHist( img, train_aver,k, true);
 %create features histogram of visual tokens for training images
+%
 %{
 start_idx = 1;
 for i=1:train_n_samples 
@@ -76,6 +82,7 @@ save('trainHist.mat', 'trainHist');
 save('testHist.mat', 'testHist');
 %}
 %% Q4.Image retrieval
+%%{
 max_match = 20; %top 20 matches out of available training images
 simIndx = zeros(test_n_samples, train_n_samples);
 match_img_idx = zeros(test_n_samples, max_match);
@@ -112,4 +119,5 @@ for iTest=1 : numel(test_img)
     set(gcf, 'Name', 'Press Any Key to Show next Figure');
     pause;
 end
+%}
     

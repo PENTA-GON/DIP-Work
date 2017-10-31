@@ -24,8 +24,8 @@ function [ feat_new ] = featSelect(file,nb_new)
  else
      %returns nb_new unique integers selected randomly from 1 to nb inclusive
      randIndex = randperm(nb,nb_new);%exclude the geometry information
-     feat_new = feat(:,randIndex);
-     %feat_new = feat(6:133,randIndex);
+     %feat_new = feat(:,randIndex);
+     feat_new = feat(6:133,randIndex);
  end
  
 end
