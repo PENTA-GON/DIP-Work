@@ -35,20 +35,21 @@ for i=2:test_n_samples
     test_feat = featSelect(fullfile(test_sift_dir, num2str(cell2mat(test_filenames(i)))),nb_new);
     test_data = [test_data, test_feat];
 end
-save('train_data.mat', 'train_data');
-save('test_data.mat', 'test_data');
+save('train_data200.mat', 'train_data');
+save('test_data200.mat', 'test_data');
 %}
 %% Q2.k-means clustering
 %
 %{
-load('train_data.mat', 'train_data');
-load('test_data.mat', 'test_data');
+load('train_data128.mat', 'train_data');
+load('test_data128.mat', 'test_data');
 
-train_n_samples = 200;
-test_n_samples = 100;
 
+
+tic;
 k = 200;
 [train_counts, train_aver, train_record] = k_means( train_data,k );
+toc;
 
 %test the accuracy of k-mean 
 %
@@ -65,6 +66,8 @@ error = sum(test_aver(:,1)-b);
 %create features histogram of visual tokens for training images
 %
 %{
+test_n_samples = 100;
+train_n_samples = 200;
 start_idx = 1;
 for i=1:train_n_samples 
     img = train_data(:, start_idx : 100*i);
@@ -78,17 +81,19 @@ for j=1:test_n_samples
     testHist{j} = featureHist( img, train_aver,k, false);
     start_idx = 100*j + 1; 
 end
-save('trainHist.mat', 'trainHist');
-save('testHist.mat', 'testHist');
+save('trainHist128.mat', 'trainHist');
+save('testHist128.mat', 'testHist');
 %}
 %% Q4.Image retrieval
 %%{
+train_n_samples = 200;
+test_n_samples = 100;
 max_match = 20; %top 20 matches out of available training images
 simIndx = zeros(test_n_samples, train_n_samples);
 match_img_idx = zeros(test_n_samples, max_match);
 match_img_dist= zeros(test_n_samples, max_match);
-load('testHist.mat');
-load('trainHist.mat');
+load('testHist128.mat');
+load('trainHist128.mat');
 for iTest=1 : test_n_samples
    for iTrain=1 : train_n_samples
        simIndx(iTest, iTrain) = ChiSqDistance( testHist{iTest}, trainHist{iTrain});
