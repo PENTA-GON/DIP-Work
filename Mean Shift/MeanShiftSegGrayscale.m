@@ -1,4 +1,4 @@
-function output = MeanShiftSeg(input, Hs, Hr, M)
+function output = MeanShiftSegGrayscale(input, Hs, Hr, M)
 
 ht=size(input,1);
 wd=size(input,2);
@@ -12,11 +12,7 @@ modeY = [size_];
 
 clusterX = [size_];
 clusterY = [size_];
-
-clusterR = [size_];
-clusterG = [size_];
-clusterB = [size_];
-
+clusterZ = [size_];
 
 clusterSize = 0;
 clusterMemberSize = [size_];
@@ -32,9 +28,7 @@ for y=1:ht
         % normalize with Hs & Hr
         newX = round(single(x) / Hs);
         newY = round(single(y) / Hs);
-        newR = round(single(input(y,x,1)) / Hr);
-        newG = round(single(input(y,x,2)) / Hr);
-        newB = round(single(input(y,x,3)) / Hr);
+        newZ = round(single(input(y,x)) / Hr);
         
         windowSize = Hs;
         
@@ -54,18 +48,16 @@ for y=1:ht
         dist = 1;
         while(dist > 0.2)
             withinCount = 0;
-            accumulateR = 0; accumulateG = 0; accumulateB = 0;
+            accumulateZ = 0;
             accumulateX = 0; accumulateY = 0;
             for li=1:size(patch,1)
                 for lj=1:size(patch,2)
                     % normalize with Hs & Hr
                     yi = single(r1 + li - 1) / Hs;
                     xi = single(c1 + lj - 1) / Hs;
-                    xiR = single(patch(li, lj, 1)) / Hr;
-                    xiG = single(patch(li, lj, 2)) / Hr;
-                    xiB = single(patch(li, lj, 3)) / Hr;
+                    xiZ = single(patch(li, lj, 1)) / Hr;
                     
-                    difR = newR - xiR; difG = newG - xiG; difB = newB -xiB;
+                    difZ = newZ - xiZ;
                     difX = newX - xi; difY = newY - yi;
                     
                     % Epanechnikov kernel derivative, basically only consider
@@ -225,7 +217,6 @@ for ci=1:clusterSize
     end
 end
 
-    
 fprintf('\n time taken for meanshift=%f \n',toc);
 
 subplot(2,2,1),imshow(input); title('input image');
