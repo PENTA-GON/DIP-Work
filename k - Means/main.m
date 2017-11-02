@@ -23,10 +23,11 @@ test_n_samples = numel(test_filenames);
 
 nb_new = 100; %number of chosen features
 %
-%{
+
 train_data = featSelect(fullfile(train_sift_dir, num2str(cell2mat(train_filenames(1)))),nb_new);
 test_data = featSelect(fullfile(test_sift_dir, num2str(cell2mat(test_filenames(1)))),nb_new);
-
+%
+%{
 for i=2:train_n_samples 
     train_feat = featSelect(fullfile(train_sift_dir, num2str(cell2mat(train_filenames(i)))),nb_new);
     train_data = [train_data, train_feat];
@@ -35,8 +36,8 @@ for i=2:test_n_samples
     test_feat = featSelect(fullfile(test_sift_dir, num2str(cell2mat(test_filenames(i)))),nb_new);
     test_data = [test_data, test_feat];
 end
-save('train_data200.mat', 'train_data');
-save('test_data200.mat', 'test_data');
+save('train_data128.mat', 'train_data');
+save('test_data128.mat', 'test_data');
 %}
 %% Q2.k-means clustering
 %
@@ -85,29 +86,64 @@ save('trainHist128.mat', 'trainHist');
 save('testHist128.mat', 'testHist');
 %}
 %% Q4.Image retrieval
+train_filenames = dir(fullfile(train_img_dir,'*.bmp'));
+train_img = {train_filenames.name};
+test_filenames = dir(fullfile(test_img_dir,'*.bmp'));
+test_img = {test_filenames.name};
+%define classes: 
+class_id = [1, 2, 3]; %bike, person, background
+class_label = {'bike', 'person','background'};
+%training image class id groundtruth
+train_class_gth = zeros(1, numel(train_img));
+for i = 1 : numel(train_img)
+   for j=1 : numel(class_label)-1
+       if ~isempty( strfind(train_img{i}, class_label{j}))
+            if strfind(train_img{i},class_label{j}) == 1
+                train_class_gth(i) = class_id(j);
+                break;
+            else %background image
+                train_class_gth(i) = 3;
+            end
+       end
+   end
+end
+%testing image class id groundtruth
+test_class_gth = zeros(1, numel(test_img));
+for i = 1 : numel(test_img)
+    for j=1 : numel(class_label)-1
+         if ~isempty( strfind(test_img{i}, class_label{j}))
+            if strfind(test_img{i},class_label{j}) == 1
+                test_class_gth(i) = class_id(j);
+                break;
+            else %background image
+                test_class_gth(i) = 3;
+            end
+        end
+    end
+end
 %%{
 train_n_samples = 200;
 test_n_samples = 100;
 max_match = 20; %top 20 matches out of available training images
-simIndx = zeros(test_n_samples, train_n_samples);
+simIndx = cell(test_n_samples, train_n_samples);
 match_img_idx = zeros(test_n_samples, max_match);
 match_img_dist= zeros(test_n_samples, max_match);
 load('testHist128.mat');
 load('trainHist128.mat');
 for iTest=1 : test_n_samples
    for iTrain=1 : train_n_samples
-       simIndx(iTest, iTrain) = ChiSqDistance( testHist{iTest}, trainHist{iTrain});
+       simIndx{iTest, iTrain} = ChiSqDistance( testHist{iTest}, trainHist{iTrain});
    end
-   [chisq, idx] = sort(simIndx(iTest,:), 'descend');
+   %TODO find out how to do proper sorting with array
+   [chisq, idx] = sort([simIndx{iTest,:}]);%'ascend'
    match_img_idx(iTest,:) = idx(1:max_match);
    match_img_dist(iTest,:) = chisq(1:max_match);
 end
 
+%% Evaluate image retrieval performance using confusion matrix
+
+
 %Disply top 20 matched training images per test image
-train_filenames = dir(fullfile(train_img_dir,'*.bmp'));
-train_img = {train_filenames.name};
-test_filenames = dir(fullfile(test_img_dir,'*.bmp'));
-test_img = {test_filenames.name};
 figure('units','normalized','outerposition',[0 0 1 1]);
 for iTest=1 : numel(test_img)
     rnd_img = datasample([1:1:numel(test_img)],1,'Replace',false);
