@@ -70,8 +70,8 @@ for y=1:ht
                     
                     % Epanechnikov kernel derivative, basically only consider
                     % point in the hypersphere of radius bandwidth
-                    euclideanR = sqrt(difX*difX + difY*difY + difR*difR);
-                    euclideanS = sqrt(difG*difG + difB*difB);
+                    euclideanR = sqrt(difB*difB + difG*difG + difR*difR);
+                    euclideanS = sqrt(difX*difX + difY*difY);
                     if euclideanR < Hr && euclideanS < Hs
                         accumulateR = accumulateR + xiR;
                         accumulateG = accumulateG + xiG;
