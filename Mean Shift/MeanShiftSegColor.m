@@ -1,4 +1,7 @@
-function output = MeanShiftSeg(input, Hs, Hr, M)
+function output = MeanShiftSeg(input, Hs, Hr, M, windowSize)
+
+org = input;
+input = rgb2lab(input);
 
 ht=size(input,1);
 wd=size(input,2);
@@ -26,7 +29,9 @@ figure(1);
 
 fprintf('\n Starting meanshift');
 tic
-
+      
+%windowSize = Hs;
+        
 for y=1:ht
     for x=1:wd
         % normalize with Hs & Hr
@@ -36,12 +41,10 @@ for y=1:ht
         newG = round(single(input(y,x,2)) / Hr);
         newB = round(single(input(y,x,3)) / Hr);
         
-        windowSize = Hs;
-        
         shiftX = x; % newX * Hs;
         shiftY = y; % newY * Hs;
-        r1 = shiftY - windowSize; r2 = shiftY + windowSize;
-        c1 = shiftX - windowSize; c2 = shiftX + windowSize;
+        r1 = shiftY - round(windowSize); r2 = shiftY + round(windowSize);
+        c1 = shiftX - round(windowSize); c2 = shiftX + round(windowSize);
         
         % check boundaries of the region
         if (r1<1) r1 = 1 ; end
@@ -70,9 +73,11 @@ for y=1:ht
                     
                     % Epanechnikov kernel derivative, basically only consider
                     % point in the hypersphere of radius bandwidth
-                    euclideanR = sqrt(difB*difB + difG*difG + difR*difR);
-                    euclideanS = sqrt(difX*difX + difY*difY);
-                    if euclideanR < Hr && euclideanS < Hs
+                    euclideanD = sqrt(difX*difX + difY*difY + difR*difR + difG*difG + difB*difB);
+                    
+                    % If incribed hypersphere is the bound, then limit should be windowSize. However, if the superscribed
+                    % hypershpere is the bound, then the limit should be distance from center to a vertex, i.e., sqrt(dim)*windowSize, where dim - dimesnions 
+                    if euclideanD <= windowSize
                         accumulateR = accumulateR + xiR;
                         accumulateG = accumulateG + xiG;
                         accumulateB = accumulateB + xiB;
@@ -118,7 +123,7 @@ for y=1:ht
     end
 end
 
-subplot(2,2,2),imshow(output .* Hr); title('Meanshift Filtered');
+subplot(2,2,2),imshow(lab2rgb(output) .* Hr); title('Meanshift Filtered');
 
 % do the clustering
 for y=1:ht
@@ -228,7 +233,7 @@ end
     
 fprintf('\n time taken for meanshift=%f \n',toc);
 
-subplot(2,2,1),imshow(input); title('input image');
-subplot(2,2,3),imshow(output); title('meanshift segmented image')
+subplot(2,2,1),imshow(org); title('input image');
+subplot(2,2,3),imshow(lab2rgb(output)); title('meanshift segmented image')
 
 end
