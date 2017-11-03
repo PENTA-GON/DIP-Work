@@ -13,10 +13,11 @@ function display_features(file1,imf1,dx,dy)
 %disp_features('img1.haraff','img1.ppm',0,0)
 
 [feat1 nb dim]=loadFeatures(file1);
-clf;imshow(imf1);
+clf;imshow(imf1);ylabel(strcat('Total SIFT Features: ', num2str(nb)));
 for c1=1:nb,%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 drawellipse([feat1(3,c1) feat1(4,c1); feat1(4,c1) feat1(5,c1) ], feat1(1,c1)+dx, feat1(2,c1)+dy,'y');
 end%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 end
 
 function drawellipse(Mi,i,j,col)
