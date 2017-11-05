@@ -133,7 +133,6 @@ for iTest=1 : test_n_samples
        %2 -- Chi-sq measurement
        %3 -- Cosine distance
        %4 -- Histogram intersection
-       %5 -- Manhattan Distance
        simIndx{iTest, iTrain} = distance( testHist{iTest}, trainHist{iTrain},2);
    end   
    [chisq, idx] = sort([simIndx{iTest,:}]);%'ascend'
