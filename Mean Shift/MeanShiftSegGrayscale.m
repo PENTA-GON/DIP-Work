@@ -160,7 +160,7 @@ for ci=1:clusterSize
         newCluster = ci;
         nearestDist = 100000;
         for ci2=1:clusterSize
-            if(ci ~= ci2 && clusterMemberSize(c2) ~= 0)
+            if(ci ~= ci2 && clusterMemberSize(ci2) ~= 0)
                 difZ = z - clusterZ(ci2);
                 difX = x - clusterX(ci2);
                 difY = y - clusterY(ci2);
