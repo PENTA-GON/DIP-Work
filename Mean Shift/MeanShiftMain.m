@@ -1,19 +1,27 @@
 clear, close all;
 
-%I = imread('mit.png');
-I = imread('cameraman.png');
-%I = imread('Monkey.png');
+option = 3;
 
-%I = rgb2gray(I);
+if option == 1
+    I = imread('mit.png');
+    Hs = 6;
+    Hr = 10;
+elseif option == 2
+    I = imread('cameraman.png');
+    Hs = 8;
+    Hr = 10;
+else
+    I = imread('Monkey.png');
+    Hs = 12;
+    Hr = 14;
+end
 
-Hs = 8;
-Hr = 4;
 M = 40;
 wSize = 2;
 
 if size(I, 3) == 3
     output = MeanShiftSegColor(I, Hs, Hr, M, wSize);
-    %output = MeanShiftSeg(I, Hs, Hr, M);
 else
     output = MeanShiftSegGrayscale(I, Hs, Hr, M, wSize);
 end
+

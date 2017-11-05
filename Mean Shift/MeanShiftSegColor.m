@@ -233,7 +233,7 @@ end
     
 fprintf('\n time taken for meanshift=%f \n',toc);
 
-subplot(2,2,1),imshow(org); title('input image');
-subplot(2,2,3),imshow(lab2rgb(output)); title('meanshift segmented image')
+subplot(2,2,1),imshow(org); title('Input Image');
+subplot(2,2,3),imshow(lab2rgb(output)); title('Meanshift Segmented Image')
 
 end
