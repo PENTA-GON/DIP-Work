@@ -1,7 +1,7 @@
-%clear;close all;clc;
-
 %% Q1.preparate the dataset
-%%{
+%
+%{
+clear;close all;clc;
 addpath('DataSet(Paper3)');
 train_sift_dir = './DataSet(Paper3)/bike-train-test-sift/train';
 test_sift_dir = './DataSet(Paper3)/bike-train-test-sift/test';
@@ -26,8 +26,7 @@ nb_new = 100; %number of chosen features
 
 train_data = featSelect(fullfile(train_sift_dir, num2str(cell2mat(train_filenames(1)))),nb_new);
 test_data = featSelect(fullfile(test_sift_dir, num2str(cell2mat(test_filenames(1)))),nb_new);
-%
-%{
+%%{
 for i=2:train_n_samples 
     train_feat = featSelect(fullfile(train_sift_dir, num2str(cell2mat(train_filenames(i)))),nb_new);
     train_data = [train_data, train_feat];
@@ -42,29 +41,19 @@ save('test_data128.mat', 'test_data');
 %% Q2.k-means clustering
 %
 %{
+clear;close all;clc;
+
 load('train_data128.mat', 'train_data');
 load('test_data128.mat', 'test_data');
-
-
 
 tic;
 k = 200;
 [train_counts, train_aver, train_record] = k_means( train_data,k );
 toc;
 
-%test the accuracy of k-mean 
-%
-%{
-a = test_data(:,test_record{1});
-b = mean(a,2);
-error = sum(test_aver(:,1)-b);
-%}
 
 %}
 %% Q3.Calculate the histogram of visual tokens
-%img = test_data(:,1:100); %1st test image
-%featHist = featureHist( img, train_aver,k, true);
-%create features histogram of visual tokens for training images
 %
 %{
 test_n_samples = 100;
@@ -86,10 +75,15 @@ save('trainHist128.mat', 'trainHist');
 save('testHist128.mat', 'testHist');
 %}
 %% Q4.Image retrieval
+%%{
+train_img_dir = './DataSet(Paper3)/bike-train-test-img/train';
+test_img_dir = './DataSet(Paper3)/bike-train-test-img/test';
+
 train_filenames = dir(fullfile(train_img_dir,'*.bmp'));
 train_img = {train_filenames.name};
 test_filenames = dir(fullfile(test_img_dir,'*.bmp'));
 test_img = {test_filenames.name};
+
 %define classes: 
 class_id = [1, 2, 3]; %bike, person, background
 class_label = {'bike', 'person','background'};
@@ -135,7 +129,12 @@ match_img_comp = cell(3,1); %To compare performance using different distance met
 
 for iTest=1 : test_n_samples
    for iTrain=1 : train_n_samples
-       simIndx{iTest, iTrain} = ChiSqDistance( testHist{iTest}, trainHist{iTrain});
+       %1 -- Euclidean Distance
+       %2 -- Chi-sq measurement
+       %3 -- Cosine distance
+       %4 -- Histogram intersection
+       %5 -- Manhattan Distance
+       simIndx{iTest, iTrain} = distance( testHist{iTest}, trainHist{iTrain},2);
    end   
    [chisq, idx] = sort([simIndx{iTest,:}]);%'ascend'
    match_img_idx(iTest,:) = idx(1:max_match);
@@ -147,7 +146,10 @@ match_img_comp{1}.dist = match_img_dist;
 
 per_class_stats = [];
 tot_ConMat = zeros(numel(class_id));%confusion matrix for 3 classes
+
+
 %% Evaluate image retrieval performance using confusion matrix
+
 for iTest=1 : test_n_samples
     test_img_gth = repmat(test_class_gth(iTest), 1, max_match);
     pred_res = train_class_gth(match_img_idx(iTest,:));

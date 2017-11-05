@@ -24,10 +24,10 @@ function [ feat_new ] = featSelect(file,nb_new)
  if(nb < nb_new)
      fprintf('the number of features is smaller than the demanded');
  else
-     %returns nb_new unique integers selected randomly from 1 to nb inclusive
+     %returns nb_new nonreduntant unique integers selected randomly from 1 to nb 
      randIndex = randperm(nb,nb_new);%exclude the geometry information
-     feat_new = feat(:,randIndex);
-     %feat_new = feat(6:133,randIndex);
+     %feat_new = feat(:,randIndex);
+     feat_new = feat(6:133,randIndex);
  end
  
 end

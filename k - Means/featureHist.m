@@ -5,11 +5,11 @@ featHist = zeros(k,1);
 
 for i = 1:size(img,2)
 
-    min = distance(img(:,i),train_aver(:,1));
+    min = distance(img(:,i),train_aver(:,1),1);
     min_ind = 1;
     
     for j = 2:k
-        dis = distance(img(:,i),train_aver(:,j));
+        dis = distance(img(:,i),train_aver(:,j),1);
         if(dis < min)
             min = dis;
             min_ind = j;
