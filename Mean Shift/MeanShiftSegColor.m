@@ -192,7 +192,7 @@ for ci=1:clusterSize
         newCluster = ci;
         nearestDist = 100000;
         for ci2=1:clusterSize
-            if(ci ~= ci2 && clusterMemberSize(c2) ~= 0)
+            if(ci ~= ci2 && clusterMemberSize(ci2) ~= 0)
                 difR = r - clusterR(ci2);
                 difG = g - clusterG(ci2);
                 difB = b - clusterB(ci2);
