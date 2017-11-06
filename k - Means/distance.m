@@ -11,8 +11,11 @@ function [D] = distance( testHist, trainHist, measMethod)
          normTest = (testHist - min(testHist))/(max(testHist) - min(testHist));
          normTrain = (trainHist - min(trainHist))/(max(trainHist) - min(trainHist));
          %compute distance
-         diff = (normTrain - normTest).^2;
+         diff = (normTrain - normTest).^2;         
          D = sum( diff(:)) / sum(normTrain(:));
+         %sumHist = normTrain + normTest;
+         %D = sum( diff(:) / normTrain(:));
+         %D = 0.5 * sum(diff(:)/sumHist(:));
          
     % Cosine distance     
     elseif(measMethod == 3)
@@ -27,7 +30,17 @@ function [D] = distance( testHist, trainHist, measMethod)
     elseif(measMethod == 4)
         min_hist = min(testHist,trainHist);
         D = 1 -(sum(min_hist(:)) / sum(testHist(:)));
-        
+    
+	%Pair-wise Chi-sq distance
+	elseif(measMethod == 5)			
+			m = size(trainHist,1);  n = size(testHist,1);
+			mOnes = ones(1,m); D = zeros(m,n);
+			for i=1:n
+			  yi = testHist(i,:);  yiRep = yi( mOnes, : );
+			  s = yiRep + trainHist;    d = yiRep - trainHist;
+			  D(:,i) = sum( d.^2 ./ (s+eps), 2 );
+			end
+			D = D/2;	
     end
 
 end
