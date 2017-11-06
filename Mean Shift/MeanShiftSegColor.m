@@ -1,4 +1,4 @@
-function output = MeanShiftSeg(input, Hs, Hr, M, windowSize)
+function output = MeanShiftSeg(input, Hs, Hr, M, windowSize, RCdist)
 
 org = input;
 input = rgb2lab(input);
@@ -123,7 +123,8 @@ for y=1:ht
     end
 end
 
-subplot(2,2,2),imshow(lab2rgb(output) .* Hr); title('Meanshift Filtered');
+output2 = lab2rgb(output) .* Hr;
+subplot(2,2,2),imshow(output2, [0 max(output2(:))]); title('Meanshift Filtered');
 
 % do the clustering
 for y=1:ht
@@ -143,8 +144,9 @@ for y=1:ht
             cDifX = clusterX(ci) - modeX(y,x);
             cDifY = clusterY(ci) - modeY(y,x);
             
-            cRDist = sqrt(cDifR*cDifR + cDifG*cDifG + cDifB*cDifB + cDifX*cDifX + cDifY*cDifY);
-            if cRDist <= 0.5
+            cRDist = sqrt(cDifR*cDifR + cDifG*cDifG + cDifB*cDifB);
+            cRDist2 = sqrt(cDifX*cDifX + cDifY*cDifY);
+            if cRDist <= RCdist && cRDist2 <= 0.5
                 output(y,x,1) = clusterR(ci) * Hr;
                 output(y,x,2) = clusterG(ci) * Hr;
                 output(y,x,3) = clusterB(ci) * Hr;
@@ -194,7 +196,7 @@ for ci=1:clusterSize
         newCluster = ci;
         nearestDist = 100000;
         for ci2=1:clusterSize
-            if(ci ~= ci2 && clusterMemberSize(ci2) ~= 0)
+            if(ci ~= ci2 && clusterMemberSize(ci2) > 20)
                 difR = r - clusterR(ci2);
                 difG = g - clusterG(ci2);
                 difB = b - clusterB(ci2);
@@ -210,23 +212,24 @@ for ci=1:clusterSize
             end
         end
         
-        % found the new cluster to merge into
-        for memberId=1 : clusterMemberSize(ci)
-            memberX = clusterMember(ci, memberId, 1);
-            memberY = clusterMember(ci, memberId, 2);
-            
-            if (memberX ~= 0 && memberY ~= 0)
-                output(memberY,memberX,1) = clusterR(newCluster) * Hr;
-                output(memberY,memberX,2) = clusterG(newCluster) * Hr;
-                output(memberY,memberX,3) = clusterB(newCluster) * Hr;
-                
-                % store membership id of cluster
-                clusterMemberSize(newCluster) = clusterMemberSize(newCluster) + 1;
-                clusterMember(newCluster,clusterMemberSize(newCluster), 1) = memberX;
-                clusterMember(newCluster,clusterMemberSize(newCluster), 2) = memberY;
+         if(newCluster ~= ci)
+            % found the new cluster to merge into
+            for memberId=1 : clusterMemberSize(ci)
+                memberX = clusterMember(ci, memberId, 1);
+                memberY = clusterMember(ci, memberId, 2);
+
+                if (memberX ~= 0 && memberY ~= 0)
+                    output(memberY,memberX,1) = clusterR(newCluster) * Hr;
+                    output(memberY,memberX,2) = clusterG(newCluster) * Hr;
+                    output(memberY,memberX,3) = clusterB(newCluster) * Hr;
+
+                    % store membership id of cluster
+                    clusterMemberSize(newCluster) = clusterMemberSize(newCluster) + 1;
+    %                 clusterMember(newCluster,clusterMemberSize(newCluster), 1) = memberX;
+    %                 clusterMember(newCluster,clusterMemberSize(newCluster), 2) = memberY;
+                end
             end
-        end
-        
+         end
         % clear the old cluster
         clusterMemberSize(ci) = 0;
     end
@@ -236,6 +239,8 @@ end
 fprintf('\n time taken for meanshift=%f \n',toc);
 
 subplot(2,2,1),imshow(org); title('Input Image');
-subplot(2,2,3),imshow(lab2rgb(output)); title('Meanshift Segmented Image')
+
+output2 = lab2rgb(output);
+subplot(2,2,3),imshow(output2); title('Meanshift Segmented Image')
 
 end
