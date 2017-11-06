@@ -52,10 +52,13 @@ tStart(1) = tic;
 [train_counts, train_aver, train_record] = k_means( train_data,k );
 tStop(1) = toc(tStart(1));
 
+%medium performance results with no specified no of iterations; longer
+convergence time
 % tStart(2) = tic;
 % [train_aver_2] = kMeansCluster(train_data', k);
 % tStop(2) = toc(tStart(2));
-% 
+
+% Best convergence time but poor results 
 % tStart(3) = tic;
 % [clusters, train_aver_3] = kmeans(train_data', k);
 % tStop(3) = toc(tStart(3));
@@ -197,7 +200,7 @@ for iDist=1 : tDistMeasures
 
     per_class_stats = [];
     tot_ConMat = zeros(numel(class_id));%confusion matrix for 3 classes
-    %% Evaluate image retrieval performance using confusion matrix
+    %% Q-4 Extension. Evaluate image retrieval performance using confusion matrix
     for iTest=1 : test_n_samples
         test_img_gth = repmat(test_class_gth(iTest), 1, max_match);
         pred_res = train_class_gth(match_img_idx(iTest,:));
