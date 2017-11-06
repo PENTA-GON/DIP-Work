@@ -1,4 +1,4 @@
-function output = MeanShiftSeg(input, Hs, Hr, M, windowSize)
+function output = MeanShiftSeg(input, Hs, Hr, M, windowSize, RCdist)
 
 ht=size(input,1);
 wd=size(input,2);
@@ -107,7 +107,6 @@ subplot(2,2,2),imshow(output .* Hr); title('Meanshift Filtered');
 
 % do the clustering
 for y=1:ht
-    %break;
     for x=1:wd
         
         z = output(y,x);
@@ -119,8 +118,9 @@ for y=1:ht
             cDifX = clusterX(ci) - modeX(y,x);
             cDifY = clusterY(ci) - modeY(y,x);
             
-            cRDist = sqrt(cDifZ*cDifZ + cDifX*cDifX + cDifY*cDifY);
-            if cRDist <= 0.5
+            cRDist = sqrt(cDifZ*cDifZ);
+            cRDist2 = sqrt(cDifX*cDifX + cDifY*cDifY);
+            if cRDist <= RCdist && cRDist2 <= 0.5
                 output(y,x,1) = clusterZ(ci) * Hr;
                 
                 % store membership id of cluster
@@ -150,9 +150,9 @@ for y=1:ht
     end
 end
 
+
 % merge the small cluster
 for ci=1:clusterSize
-    %break;
     if(clusterMemberSize(ci) < M)
         z = clusterZ(ci);
         x = clusterX(ci);
@@ -162,7 +162,7 @@ for ci=1:clusterSize
         newCluster = ci;
         nearestDist = 100000;
         for ci2=1:clusterSize
-            if(ci ~= ci2 && clusterMemberSize(ci2) ~= 0)
+            if(ci ~= ci2 && (clusterMemberSize(ci2) > 20))
                 difZ = z - clusterZ(ci2);
                 difX = x - clusterX(ci2);
                 difY = y - clusterY(ci2);
@@ -170,32 +170,35 @@ for ci=1:clusterSize
                 euclidean = sqrt(difZ*difZ + difX*difX + difY*difY);
                 % this cluster is close by
                 if(euclidean < nearestDist)
-                    newCluster = ci2;
-                    nearestDist = euclidean;
+                        newCluster = ci2;
+                        nearestDist = euclidean;
                 end
             end
         end
         
-        % found the new cluster to merge into
-        for memberId=1 : clusterMemberSize(ci)
-            memberX = clusterMember(ci, memberId, 1);
-            memberY = clusterMember(ci, memberId, 2);
-            
-            if (memberX ~= 0 && memberY ~= 0)
-                output(memberY,memberX,1) = clusterZ(newCluster) * Hr;
-                
-                % store membership id of cluster
-                clusterMemberSize(newCluster) = clusterMemberSize(newCluster) + 1;
-                clusterMember(newCluster,clusterMemberSize(newCluster), 1) = memberX;
-                clusterMember(newCluster,clusterMemberSize(newCluster), 2) = memberY;
+        if(newCluster ~= ci)
+            % found the new cluster to merge into
+            for memberId=1 : clusterMemberSize(ci)
+                memberX = clusterMember(ci, memberId, 1);
+                memberY = clusterMember(ci, memberId, 2);
+
+                if (memberX ~= 0 && memberY ~= 0)
+                    output(memberY,memberX,1) = clusterZ(newCluster) * Hr;
+
+                    % store membership id of cluster
+                     clusterMemberSize(newCluster) = clusterMemberSize(newCluster) + 1;
+%                     clusterMemberSize(newCluster);
+%                     clusterMember(newCluster,clusterMemberSize(newCluster), 1) = memberX;
+%                     clusterMember(newCluster,clusterMemberSize(newCluster), 2) = memberY;
+                end
             end
+
+            % clear the old cluster
+            clusterMemberSize(ci) = 0;
         end
         
-        % clear the old cluster
-        clusterMemberSize(ci) = 0;
     end
 end
-
     
 fprintf('\n time taken for meanshift=%f \n',toc);
 
