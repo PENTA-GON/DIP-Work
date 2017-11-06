@@ -53,7 +53,7 @@ tStart(1) = tic;
 tStop(1) = toc(tStart(1));
 
 %medium performance results with no specified no of iterations; longer
-convergence time
+%convergence time
 % tStart(2) = tic;
 % [train_aver_2] = kMeansCluster(train_data', k);
 % tStop(2) = toc(tStart(2));
