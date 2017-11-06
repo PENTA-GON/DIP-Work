@@ -1,7 +1,19 @@
 clear, close all;
 
-option = 3;
+%%% Params %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Hs: Spatial Normalization
+% Hr: Range Normalization
+% wSize: window size
+% M:  cluster rejection threshold
+% RCdist:  Clustering distance in the range space
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+option = 4;
+
+M = 40;
+wSize = 2;
+    
 if option == 1
     I = imread('mit.png');      %%color
     Hs = 6;
@@ -11,6 +23,10 @@ elseif option == 1.2
     I = rgb2gray(I);
     Hs = 8;
     Hr = 4;
+    M = 50;
+    wSize = 6;
+    RCdist = 50;
+    
 elseif option == 2
     I = imread('cameraman.png');    %%color
     Hs = 8;
@@ -20,38 +36,34 @@ elseif option == 2.2
     I = rgb2gray(I);
     Hs = 8;
     Hr = 4;
+    M = 20;
+    wSize = 4;
+    RCdist = 10;
+    
 elseif option == 3
     I = imread('Monkey.png');      %%color
     Hs = 12;
     Hr = 14;
-elseif option == 4              %%gray
-    I = imread('Lena.bmp');
-    I = imresize(I, 0.5);
+elseif option == 3.2
+    I = imread('Monkey.png');      %%color
+    I = rgb2gray(I);
     Hs = 8;
-    Hr = 4;
-elseif option == 5              %%gray
-    I = imread('Peppers.bmp');
-    I = imresize(I, 0.5);
-    Hs = 8;
-    Hr = 4;
-elseif option == 6              %%color
+    Hr = 4;   
+    M=150;
+    wSize = 4;
+    RCdist = 20;
+   
+elseif option == 4              %%color
     I = imread('build.png');
     I = imresize(I, 0.5);
     Hs = 8;
-    Hr = 4;
-elseif option == 7
-    I = imread('boy.jpg');          %%gray
-    Hs = 8;
-    Hr = 4;
+    Hr = 4;   
+
 end
 
-
-M = 40;
-wSize = 2;
 
 if size(I, 3) == 3
     output = MeanShiftSegColor(I, Hs, Hr, M, wSize);
 else
-    output = MeanShiftSegGrayscale(I, Hs, Hr, M, wSize);
+    output = MeanShiftSegGrayscale(I, Hs, Hr, M, wSize, RCdist);
 end
-
