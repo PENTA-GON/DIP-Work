@@ -107,6 +107,7 @@ subplot(2,2,2),imshow(output .* Hr); title('Meanshift Filtered');
 
 % do the clustering
 for y=1:ht
+    %break;
     for x=1:wd
         
         z = output(y,x);
@@ -144,13 +145,14 @@ for y=1:ht
             % store membership id of cluster
             clusterMemberSize(clusterSize) = 1;
             clusterMember(clusterSize,1, 1) = x;
-            clusterMember(clusterSize,clusterMemberSize(ci), 2) = y;
+            clusterMember(clusterSize,1, 2) = y;
         end
     end
 end
 
 % merge the small cluster
 for ci=1:clusterSize
+    %break;
     if(clusterMemberSize(ci) < M)
         z = clusterZ(ci);
         x = clusterX(ci);
