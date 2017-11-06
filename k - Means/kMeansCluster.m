@@ -2,11 +2,7 @@ function [clusters]=kMeansCluster(m,k)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % kMeansCluster - Simple k means clustering algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[maxRow, maxCol]=size(m);
-if maxRow<=k, 
-    y=[m, 1:maxRow];
-else
-	
+	[maxRow, maxCol]=size(m);
 	% initial value of centroid
 	p = randperm(size(m,1));      % random initialization
 	for i=1:k

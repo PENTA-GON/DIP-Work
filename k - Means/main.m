@@ -7,23 +7,21 @@ train_sift_dir = './DataSet(Paper3)/bike-train-test-sift/train';
 test_sift_dir = './DataSet(Paper3)/bike-train-test-sift/test';
 train_img_dir = './DataSet(Paper3)/bike-train-test-img/train';
 test_img_dir = './DataSet(Paper3)/bike-train-test-img/test';
-
-%Display SIFT features
-%display_features(fullfile(train_sift_dir, 'bike_005.sift'), fullfile(train_img_dir, 'bike_001.bmp'), 0,0);
-
 %training dataset
 train_filenames = dir(fullfile(train_sift_dir,'*.sift'));
 train_filenames = {train_filenames.name};
 train_n_samples = numel(train_filenames);
-
 %testing dataset
 test_filenames = dir(fullfile(test_sift_dir,'*.sift'));
 test_filenames = {test_filenames.name};
 test_n_samples = numel(test_filenames);
-
+%Display SIFT features
+for i=1 %: train_n_samples
+    names = strsplit(char(train_filenames(i)),'.');
+    display_features(char(fullfile(train_sift_dir, train_filenames(i))), char(fullfile(train_img_dir, strcat(names(1),'.bmp'))), 0,0);
+    %pause;
+end
 nb_new = 100; %number of chosen features
-%
-
 train_data = featSelect(fullfile(train_sift_dir, num2str(cell2mat(train_filenames(1)))),nb_new);
 test_data = featSelect(fullfile(test_sift_dir, num2str(cell2mat(test_filenames(1)))),nb_new);
 %%{
@@ -37,6 +35,8 @@ for i=2:test_n_samples
 end
 save('train_data128.mat', 'train_data');
 save('test_data128.mat', 'test_data');
+
+return;
 %}
 %% Q2.k-means clustering
 %
@@ -48,23 +48,25 @@ load('test_data128.mat', 'test_data');
 
 k = 200;
 tStart(1) = tic;
+%best performance results with this clustering though 15 iterations
 [train_counts, train_aver, train_record] = k_means( train_data,k );
 tStop(1) = toc(tStart(1));
 
 % tStart(2) = tic;
 % [train_aver_2] = kMeansCluster(train_data', k);
 % tStop(2) = toc(tStart(2));
-
+% 
 % tStart(3) = tic;
 % [clusters, train_aver_3] = kmeans(train_data', k);
 % tStop(3) = toc(tStart(3));
+% train_aver_3 = train_aver_3';
+% save('RunningTime_clustering.mat', 'tStop');
 
-train_aver_3 = train_aver_3';
-save('RunningTime_clustering.mat', 'tStop');
+ save('train_aver.mat','train_aver');
+% save('train_aver_2.mat','train_aver_2');
+% save('train_aver_3.mat','train_aver_3');
 
-save('train_aver.mat','train_aver');
-save('train_aver_2.mat','train_aver_2');
-save('train_aver_3.mat','train_aver_3');
+return;
 %}
 %% Q3.Calculate the histogram of visual tokens
 % Using cluster centroids from 3 different implementations
@@ -80,25 +82,47 @@ load('train_aver_3.mat');
 
 test_n_samples = 100;
 train_n_samples = 200;
-start_idx = 1;
-for i=1:train_n_samples 
-    img = train_data(:, start_idx : 100*i);
-    trainHist{i} = featureHist( img, train_aver_2,k, false);
-    start_idx = 100*i + 1;    
+
+clusters{1} = train_aver;
+clusters{2} = train_aver_2;
+clusters{3} = train_aver_3;
+save_train_str = {'trainHist128_1.mat','trainHist128_2.mat','trainHist128_2.mat'};
+save_test_str = {'testHist128_1.mat','testHist128_2.mat','testHist128_2.mat'};
+for iCluster=1% : 3 %Only using the best clustering; Option to run all 3 cluster results
+    start_idx = 1;
+    for i=1:train_n_samples 
+        img = train_data(:, start_idx : 100*i);
+        if i == 1
+            trainHist{i} = featureHist( img, clusters{iCluster},k, true);
+        else
+            trainHist{i} = featureHist( img, clusters{iCluster},k, false);
+        end
+        start_idx = 100*i + 1;    
+    end
+    %create features histogram of visual tokens for testing images
+    start_idx = 1;
+    for j=1:test_n_samples
+        img = test_data(:, start_idx : 100*j);
+        if j==1
+            testHist{j} = featureHist( img, clusters{iCluster},k, true);
+        else
+            testHist{j} = featureHist( img, clusters{iCluster},k, false);
+        end
+        start_idx = 100*j + 1; 
+    end
+    save(save_train_str{iCluster}, 'trainHist');
+    save(save_test_str{iCluster}, 'testHist');
 end
-%create features histogram of visual tokens for testing images
-start_idx = 1;
-for j=1:test_n_samples
-    img = test_data(:, start_idx : 100*j);
-    testHist{j} = featureHist( img, train_aver,k, false);
-    start_idx = 100*j + 1; 
-end
-save('trainHist128_3.mat', 'trainHist');
-save('testHist128_3.mat', 'testHist');
+return;
 %}
 %% Q4.Image retrieval
 %%{
 close all;clear;clc;
+%load train and test image histogram
+% Only using 15 iterations cluster (Best result)
+load('testHist128_1.mat');
+load('trainHist128_1.mat');
+
 train_img_dir = './DataSet(Paper3)/bike-train-test-img/train';
 test_img_dir = './DataSet(Paper3)/bike-train-test-img/test';
 train_filenames = dir(fullfile(train_img_dir,'*.bmp'));
@@ -143,8 +167,6 @@ max_match = 20; %top 20 matches out of available training images
 simIndx = cell(test_n_samples, train_n_samples);
 match_img_idx = zeros(test_n_samples, max_match);
 match_img_dist= zeros(test_n_samples, max_match);
-load('testHist128_1.mat');
-load('trainHist128_1.mat');
 
 tDistMeasures = 5;
 distPerfComp = [];
@@ -210,7 +232,7 @@ for iDist=1 : tDistMeasures
     distPerfComp(iDist).t_class_stats = t_class_stats;
     distPerfComp(iDist).per_class_stats = per_class_stats;
 end
-save('distPerfComparison.mat', 'distPerfComp');
+save('distPerfComparison_1.mat', 'distPerfComp');
 figure;
 for i=1 : 5
     acc(i,1:3) = distPerfComp(i).t_class_stats.Accuracy;
@@ -230,7 +252,7 @@ xlabel('Distance Measures');
 legend('bike','person','background');
 set(gca,'xticklabels',{'Euclidean','Chi-sq','Cosine','HistIntersect','Pair-wise Chi-sq'});
 
-%Best result to display 
+%Choose the Best result to display 
 [v,i] = sort(mean(fscore,2),'descend');
 match_img_idx = match_img_comp{i(1)}.idx;
 Accuracy = distPerfComp(i(1)).t_class_stats.Accuracy;
